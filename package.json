@@ -1,0 +1,32 @@
+{
+  "name": "node-libxml",
+  "version": "1.0.0",
+  "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-pre-gyp install --fallback-to-build",
+  },
+  "author": "MatthD",
+  "license": "MIT",
+  "dependencies": {
+    "bindings": "^1.3.0",
+    "nan": "^2.7.0",
+    "napi": "0.0.0",
+    "node-addon-api": "^1.0.0",
+    "node-gyp": "^3.6.2"
+  },
+  "binary": {
+    "module_name": "libxml",
+    "module_path": "./build/Release/",
+    "remote_path": "{version}",
+    "host": "https://github.com/jupitEX/node-libxml/releases/download/"
+  },
+  "gypfile": true,
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
+  "devDependencies": {
+    "node-pre-gyp": "^0.6.38"
+  }
+}
