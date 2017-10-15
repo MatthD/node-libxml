@@ -15,7 +15,7 @@ enum {
 class Libxml : public Nan::ObjectWrap {
 public:
   static NAN_MODULE_INIT(Init);
-  static inline xmlDocPtr docPrt;
+  xmlDocPtr docPrt;
   // Libxml::document* doc;
 
 private:
