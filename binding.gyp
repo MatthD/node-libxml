@@ -1,17 +1,17 @@
 {
   'targets': [
     {
-      'target_name': 'libxml',
+      'target_name': 'xml',
       'product_extension': 'node',
       'type': 'shared_library',
       'include_dirs': [
         'vendor/libxml/include',
         "<!(node -e \"require('nan')\")"
       ],
-      'cflags': [ '-Wall' ],
-      'xcode_settings': {
-        'OTHER_CFLAGS': [ '-Wall' ]
-      },
+      # 'cflags': [ '-Wall' ],
+      # 'xcode_settings': {
+      #   'OTHER_CFLAGS': [ '-Wall' ]
+      # },
       'sources': [
         'libxml.cpp',
         'vendor/libxml/buf.c',
