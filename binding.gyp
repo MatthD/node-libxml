@@ -8,10 +8,10 @@
         'vendor/libxml/include',
         "<!(node -e \"require('nan')\")"
       ],
-      # 'cflags': [ '-Wall' ],
-      # 'xcode_settings': {
-      #   'OTHER_CFLAGS': [ '-Wall' ]
-      # },
+      'cflags': [ '-Wall' ],
+      'xcode_settings': {
+        'OTHER_CFLAGS': [ '-Wall' ]
+      },
       'sources': [
         'libxml.cpp',
         'vendor/libxml/buf.c',
