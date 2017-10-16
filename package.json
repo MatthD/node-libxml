@@ -26,7 +26,7 @@
     "module_name": "xml",
     "module_path": "./build/Release/",
     "remote_path": "{version}",
-    "host": "https://github.com/jupitEX/node-libxml/releases/download/"
+    "host": "https://github.com/jupitex/node-libxml/releases/download/"
   },
   "gypfile": true,
   "bundledDependencies": [
