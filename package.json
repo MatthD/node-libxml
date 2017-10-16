@@ -3,6 +3,10 @@
   "version": "1.0.2",
   "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jupitex/node-libxml.git"
+  },
   "scripts": {
     "test": "mocha",
     "install": "node-pre-gyp install --fallback-to-build"
