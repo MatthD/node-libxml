@@ -1,0 +1,36 @@
+version: 1.0-{build}
+os: Visual Studio 2015
+environment:
+  matrix:
+    - nodejs_version: 8.6
+      platform: x64
+    - nodejs_version: 6.11
+      platform: x64
+    - nodejs_version: 4.8
+      platform: x64
+
+cache:
+  - '%APPDATA%\npm-cache'
+install:
+  - ps: Install-Product node $env:nodejs_version $env:platform
+  # Upgrade npm
+  # - npm install -g npm
+  - npm install -g npm
+  - set PATH=%APPDATA%\npm;%PATH%
+  - npm i nan
+  - npm install -g node-pre-gyp
+  - npm install -g node-pre-gyp-github
+
+build_script:
+  - node-pre-gyp configure
+  - node-pre-gyp build
+  - node-pre-gyp package
+test: off
+artifacts:
+  - path: .\build\stage
+on_success:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
+  - git config --global user.email "matthias.dieudonne@gmail.com"
+  - git config --global user.name "MatthD"
+  - node-pre-gyp-github publish --release

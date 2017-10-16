@@ -9,14 +9,15 @@
 using namespace std;
 using namespace v8;
 
-void errorsHandler(void * userData, xmlErrorPtr error){
+void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
   return;
 };
 
 Libxml::Libxml(bool debug) {
-  // if(!debug){
-  //   xmlSetStructuredErrorFunc(vctxt,errorsHandler);
-  // }
+   // if(!debug){
+   //  void *  vctxt;
+   //  xmlSetStructuredErrorFunc(vctxt,errorsHandler);
+   // }
 }
 Libxml::~Libxml() {}
 
@@ -52,6 +53,7 @@ NAN_METHOD(Libxml::New) {
     info.GetReturnValue().Set(cons->NewInstance(argc, argv));
   }
 }
+
 NAN_METHOD(Libxml::load) {
   if (info.Length() < 1){
     return Nan::ThrowTypeError("Load requires at least 1 argument");
@@ -62,9 +64,9 @@ NAN_METHOD(Libxml::load) {
 
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  Libxml::docPrt = xmlReadFile(filename, "utf8", options);
+  libxml->docPrt = xmlReadFile(filename, "utf8", options);
 
-  if(docPrt == NULL){
+  if(libxml->docPrt == NULL){
     info.GetReturnValue().Set(Nan::False());
   }else{
     info.GetReturnValue().Set(Nan::True());
@@ -73,46 +75,40 @@ NAN_METHOD(Libxml::load) {
 
 NAN_METHOD(Libxml::getDtd)
 {
-    Nan::HandleScope scope;
-    Libxml* document = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-    assert(document);
+  Nan::HandleScope scope;
+  Libxml* document = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  assert(document);
+  xmlDtdPtr dtd = xmlGetIntSubset(document->docPrt);
 
-    xmlDtdPtr dtd = xmlGetIntSubset(Libxml::docPrt);
+  if (!dtd) {
+    return info.GetReturnValue().Set(Nan::Null());
+  }
 
-    if (!dtd) {
-        return info.GetReturnValue().Set(Nan::Null());
-    }
+  const char* name = (const char *)dtd->name;
+  const char* extId = (const char *)dtd->ExternalID;
+  const char* sysId = (const char *)dtd->SystemID;
 
-    const char* name = (const char *)dtd->name;
-    const char* extId = (const char *)dtd->ExternalID;
-    const char* sysId = (const char *)dtd->SystemID;
+  v8::Local<v8::Object> dtdObj = Nan::New<v8::Object>();
+  v8::Local<v8::Value> nameValue = (v8::Local<v8::Value>)Nan::Null();
+  v8::Local<v8::Value> extValue = (v8::Local<v8::Value>)Nan::Null();
+  v8::Local<v8::Value> sysValue = (v8::Local<v8::Value>)Nan::Null();
 
-    v8::Local<v8::Object> dtdObj = Nan::New<v8::Object>();
-    v8::Local<v8::Value> nameValue = (v8::Local<v8::Value>)Nan::Null();
-    v8::Local<v8::Value> extValue = (v8::Local<v8::Value>)Nan::Null();
-    v8::Local<v8::Value> sysValue = (v8::Local<v8::Value>)Nan::Null();
+  if (name != NULL) {
+    nameValue = (v8::Local<v8::Value>)Nan::New<v8::String>(name, strlen(name)).ToLocalChecked();
+  }
+  if (extId != NULL) {
+    extValue = (v8::Local<v8::Value>)Nan::New<v8::String>(extId, strlen(extId)).ToLocalChecked();
+  }
+  if (sysId != NULL) {
+    sysValue = (v8::Local<v8::Value>)Nan::New<v8::String>(sysId, strlen(sysId)).ToLocalChecked();
+  }
 
-    if (name != NULL) {
-        nameValue = (v8::Local<v8::Value>)Nan::New<v8::String>(name, strlen(name)).ToLocalChecked();
-    }
+  // to get publicId or systemId it's the same ... http://xmlsoft.org/html/libxml-tree.html#xmlDtd
+  Nan::Set(dtdObj, Nan::New<v8::String>("name").ToLocalChecked(), nameValue);
+  Nan::Set(dtdObj, Nan::New<v8::String>("externalId").ToLocalChecked(), extValue);
+  Nan::Set(dtdObj, Nan::New<v8::String>("systemId").ToLocalChecked(), sysValue);
 
-    if (extId != NULL) {
-        extValue = (v8::Local<v8::Value>)Nan::New<v8::String>(extId, strlen(extId)).ToLocalChecked();
-    }
-
-    if (sysId != NULL) {
-        sysValue = (v8::Local<v8::Value>)Nan::New<v8::String>(sysId, strlen(sysId)).ToLocalChecked();
-    }
-
-
-    Nan::Set(dtdObj, Nan::New<v8::String>("name").ToLocalChecked(), nameValue);
-
-    Nan::Set(dtdObj, Nan::New<v8::String>("externalId").ToLocalChecked(), extValue);
-
-    Nan::Set(dtdObj, Nan::New<v8::String>("systemId").ToLocalChecked(), sysValue);
-
-    return info.GetReturnValue().Set(dtdObj);
-
+  return info.GetReturnValue().Set(dtdObj);
 }
 
 NAN_METHOD(Libxml::validateAgainstDtd){
@@ -122,6 +118,7 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   String::Utf8Value val(info[0]->ToString());
   const char* filenameDtd(*val);
+  bool showErrors = info[1]->BooleanValue();;
 
   int dtdValidationResult;
   xmlDtdPtr dtdPtr;
@@ -137,8 +134,15 @@ NAN_METHOD(Libxml::validateAgainstDtd){
     return Nan::ThrowTypeError("ERROR_OCCURED, cannot create validation contexte");
   }
 
+  //Instead we could set this to disbale output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
+  if (!showErrors) {
+    vctxt->userData = (void *) Libxml::errorsHandler;
+    vctxt->error = (xmlValidityErrorFunc) Libxml::errorsHandler;
+    vctxt->warning = (xmlValidityWarningFunc) Libxml::errorsHandler;
+  }
+
   // Validation
-  dtdValidationResult = xmlValidateDtd(vctxt, Libxml::docPrt, dtdPtr);
+  dtdValidationResult = xmlValidateDtd(vctxt, libxml->docPrt, dtdPtr);
   // Libération de la mémoire
   xmlFreeValidCtxt(vctxt);
   xmlFreeDtd(dtdPtr);
