@@ -22,9 +22,13 @@ Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it
   // getDtd() return an object containing DTD info:  { "name": "article","externalId": "my doctype of doom","systemId": "mydoctype.dtd"}
   // Info: systemID could be a publicId too
   let dtdFile = libxml.getDtd();
+
+  //Get some xpaths;
+  let aRandomPathBoolean = libxml.xpathSelect('boolean(//some/path'));
+  let aRandomPathNumber = libxml.xpathSelect('number(//some/path'));
+  let countSomeElements = libxml.xpathSelect('count(//some/path'));
+  ... & all xpath could do I think
 ```
 
 ## Todo:
-- get Xpaths
-- Travis config
-- Build for all os..
+- test on xpathSelect
