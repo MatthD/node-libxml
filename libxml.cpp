@@ -33,6 +33,7 @@ NAN_MODULE_INIT(Libxml::Init) {
 
   Nan::SetPrototypeMethod(tpl, "load", load);
   Nan::SetPrototypeMethod(tpl, "getDtd", getDtd);
+  Nan::SetPrototypeMethod(tpl, "xpathSelect", xpathSelect);
   Nan::SetPrototypeMethod(tpl, "validateAgainstDtd", validateAgainstDtd);
 
   Local<ObjectTemplate> instTpl = tpl->InstanceTemplate();
@@ -152,6 +153,82 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   }else{
     info.GetReturnValue().Set(Nan::False());
   }
+}
+
+NAN_METHOD(Libxml::xpathSelect){
+
+  if (info.Length() < 1){
+    return Nan::ThrowTypeError("xpathSelect requires at least 1 argument");
+  }
+
+  Nan::EscapableHandleScope scope;
+  v8::Local<v8::Value> res;
+
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  String::Utf8Value val(info[0]->ToString());
+  const char* xpathToGet(*val);
+  xmlChar * xpathExpr = xmlCharStrdup(xpathToGet);
+
+
+  xmlXPathContextPtr xpathCtx;
+  xmlXPathObjectPtr xpathObj;
+
+  /* Create xpath evaluation context */
+  xpathCtx = xmlXPathNewContext(libxml->docPrt);
+  if(xpathCtx == NULL) {
+    return Nan::ThrowTypeError("Error: unable to create new XPath context");
+  }
+
+  /* Register namespaces from list (if any) */
+  // if((nsList != NULL) && (register_namespaces(xpathCtx, nsList) < 0)) {
+  //   return Nan::ThrowTypeError("Error: failed to register namespaces list");
+  // }
+
+  /* Evaluate xpath expression */
+  xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
+  if(xpathObj == NULL) {
+    xmlXPathFreeContext(xpathCtx);
+    info.GetReturnValue().Set(Nan::False());
+  }
+  else if(xpathObj) {
+    switch (xpathObj->type) {
+    // case XPATH_NODESET: {
+    //   if (xmlXPathNodeSetIsEmpty(xpathObj->nodesetval)) {
+    //     res = Nan::New<v8::Array>(0);
+    //     break;
+    //   }
+
+    //   v8::Local<v8::Array> nodes = Nan::New<v8::Array>(xpathObj->nodesetval->nodeNr);
+    //   for (int i = 0; i != xpathObj->nodesetval->nodeNr; ++i) {
+    //     Nan::Set(nodes, i, xmlNode::New(xpathObj->nodesetval->nodeTab[i]));
+    //   }
+
+    //   res = nodes;
+    //   break;
+    // }
+
+    case XPATH_BOOLEAN:
+      res = Nan::New<v8::Boolean>(xpathObj->boolval);
+      break;
+
+    case XPATH_NUMBER:
+      res = Nan::New<v8::Number>(xpathObj->floatval);
+      break;
+
+    case XPATH_STRING:
+      res = Nan::New<v8::String>((const char *)xpathObj->stringval,
+                            xmlStrlen(xpathObj->stringval)).ToLocalChecked();
+      break;
+
+    default:
+      res = Nan::Null();
+      break;
+    }
+  }
+
+  xmlXPathFreeObject(xpathObj);
+  return info.GetReturnValue().Set(scope.Escape(res));
+  // return scope.Escape(res);
 }
 
 void InitLibxml(v8::Local<v8::Object> exports) { Libxml::Init(exports); }

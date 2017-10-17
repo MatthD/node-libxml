@@ -5,6 +5,9 @@
 
 #include "libxml/parser.h"
 #include "libxml/valid.h"
+#include "libxml/tree.h"
+#include "libxml/xpath.h"
+#include "libxml/xpathInternals.h"
 
 enum {
   ERROR_OCCURED = -1, // Une erreur est survenue pendant la validation
@@ -26,6 +29,7 @@ private:
 
   static NAN_METHOD(New);
   static NAN_METHOD(load);
+  static NAN_METHOD(xpathSelect);
   static NAN_METHOD(getDtd);
   static NAN_METHOD(validateAgainstDtd);
   
