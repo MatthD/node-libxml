@@ -2,7 +2,8 @@
 <xpath>
     <to>
         <my>
-            <infos>trezaq</infos>
+            <infos attrib="example">trezaq</infos>
+            <infosdust>23</infosdust>
         </my>
     </to>
 </xpath>

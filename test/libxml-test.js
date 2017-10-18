@@ -37,5 +37,35 @@ describe('popplonode', function () {
     expect(currentDtd).to.have.property('externalId', 'my doctype of doom');
     expect(currentDtd).to.have.property('systemId', 'mydoctype.dtd');
   });
+  it('Shoud return correct xpath values', function () {
+    let libxml = new Libxml(),
+    xmlfile = libxml.load('test/data/test-default.xml'),
+    info = libxml.xpathSelect('string(//infos)'),
+    infodust = libxml.xpathSelect('number(//infosdust)'),
+    attrib = libxml.xpathSelect('string(//infos/@attrib)'),
+    infoExist = libxml.xpathSelect('boolean(//infos)'),
+    info23NotExist = libxml.xpathSelect('boolean(//infos23)'),
+    xpathToMyExist = libxml.xpathSelect('boolean(/xpath/to/my)'),
+    nbElementsInMy = libxml.xpathSelect('count(//my//*)'),
+    nbElementsInXpath = libxml.xpathSelect('count(/xpath//*)');
+
+    expect(info).to.be.a.string;
+    expect(info).to.have.string('trezaq');
+    expect(infodust).to.be.a('number');
+    expect(infodust).to.equal(23);
+    expect(attrib).to.be.a.string;
+    expect(attrib).to.have.string('example');
+    expect(infoExist).to.be.a('boolean');
+    expect(infoExist).to.be.true;
+    expect(info23NotExist).to.be.a('boolean');
+    expect(info23NotExist).to.be.false;
+    expect(xpathToMyExist).to.be.a('boolean');
+    expect(xpathToMyExist).to.be.true;
+    expect(nbElementsInMy).to.be.a('number');
+    expect(nbElementsInMy).to.equal(2);
+    expect(nbElementsInXpath).to.be.a('number');
+    expect(nbElementsInXpath).to.equal(4);
+
+  })
 });
 
