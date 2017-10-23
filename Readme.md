@@ -1,16 +1,24 @@
 Node-LibXML
 ==========
 
-LibXML2 Node.js Wrapper to Check: Wellformed, Validity against DTD & get doctype
+LibXML2 Node.js Wrapper to Check: Wellformed, Validity against DTD, get doctype & getXpath elements
 
 ## Requirements: 
 
 Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it as it comes :)
+Works on : Linux, Osx & Windows 
+Node: Already built for all LTS node (4,6,8)
+
+## Install
+
+```bash
+  npm i node-libxml
+```
 
 ## Use
 
 ```javascript
-  const Libxml = require('libxml');
+  const Libxml = require('node-libxml');
   let libxml = new Libxml();
 
   // load function return true if wellformed, false if not
@@ -27,8 +35,5 @@ Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it
   let aRandomPathBoolean = libxml.xpathSelect('boolean(//some/path'));
   let aRandomPathNumber = libxml.xpathSelect('number(//some/path'));
   let countSomeElements = libxml.xpathSelect('count(//some/path'));
-  ... & all xpath could do I think
+  //... & all xpath could do I think
 ```
-
-## Todo:
-- test on xpathSelect
