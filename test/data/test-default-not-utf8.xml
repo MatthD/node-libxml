@@ -1,0 +1,9 @@
+﻿<!DOCTYPE article PUBLIC "my doctype of doom" "mydoctype.dtd">
+<xpath>
+    <to>
+        <my>
+            <infos attrib="example">trezaq</infos>
+            <infosdust>23</infosdust>
+        </my>
+    </to>
+</xpath>

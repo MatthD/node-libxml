@@ -65,7 +65,7 @@ NAN_METHOD(Libxml::load) {
 
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  libxml->docPrt = xmlReadFile(filename, "utf8", options);
+  libxml->docPrt = xmlReadFile(filename, NULL, options);
 
   if(libxml->docPrt == NULL){
     info.GetReturnValue().Set(Nan::False());

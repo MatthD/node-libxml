@@ -12,6 +12,11 @@ describe('popplonode', function () {
     expect(testDefaultWf).to.be.true;
     expect(testDefaultV).to.be.true;
   });
+  it('should return weelformed on a wellformed XMl in utf8-bom & other encoding', function () {
+    let libxml = new Libxml();
+    let testNotUtf8 = libxml.load('test/data/test-default-not-utf8.xml');
+    expect(testNotUtf8).to.be.true
+  });
   // Wellformed & invalid
   it('Should return wellformed & invalid on a wellformed BUT invalid xml', function () {
     let libxml = new Libxml();
