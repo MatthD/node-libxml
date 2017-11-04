@@ -14,6 +14,7 @@
       },
       'sources': [
         'libxml.cpp',
+        'libxml-syntax-error.cpp',
         'vendor/libxml/buf.c',
         'vendor/libxml/catalog.c',
         'vendor/libxml/chvalid.c',

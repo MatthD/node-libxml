@@ -24,6 +24,9 @@ describe('popplonode', function () {
     let testInvalid = libxml.validateAgainstDtd('test/dtd/mydoctype.dtd');
     expect(testInvalidWf).to.be.true;
     expect(testInvalid).to.be.false;
+    expect(libxml).to.have.property('validationErrors');
+    expect(libxml.validationErrors).to.be.an('array');
+    expect(libxml.validationErrors.length).to.be.at.least(1);
   });
   // not wellformed
   it('Should return Not Wellformed & invalid on a not wellformed xml', function () {
@@ -31,7 +34,10 @@ describe('popplonode', function () {
     let notWellformed = libxml.load('test/data/test-not-wellformed.xml');
     let notwellformedV = libxml.validateAgainstDtd('test/dtd/mydoctype.dtd');
     expect(notWellformed).to.be.false;
-    expect(notWellformed).to.be.false;
+    expect(notwellformedV).to.be.false;
+    expect(libxml).to.have.property('wellformedErrors');
+    expect(libxml.wellformedErrors).to.be.an('array');
+    expect(libxml.wellformedErrors.length).to.be.at.least(1);
   });
   it('Should return an object contaning DTD', function () {
     let libxml = new Libxml();

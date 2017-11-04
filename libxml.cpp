@@ -13,7 +13,8 @@ void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
   return;
 };
 
-Libxml::Libxml(bool debug) {
+Libxml::Libxml() {
+  //Maybe deport debug activation here ? in the future ..
    // if(!debug){
    //  void *  vctxt;
    //  xmlSetStructuredErrorFunc(vctxt,errorsHandler);
@@ -22,8 +23,8 @@ Libxml::Libxml(bool debug) {
 Libxml::~Libxml() {}
 
 Nan::Persistent<v8::Function>& Libxml::constructor() {
-  static Nan::Persistent<v8::Function> my_constructor;
-  return my_constructor;
+  static Nan::Persistent<v8::Function> myConstructor;
+  return myConstructor;
 }
 
 NAN_MODULE_INIT(Libxml::Init) {
@@ -59,6 +60,10 @@ NAN_METHOD(Libxml::load) {
   if (info.Length() < 1){
     return Nan::ThrowTypeError("Load requires at least 1 argument");
   }
+  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+  xmlResetLastError();
+  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+            XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   String::Utf8Value val(info[0]->ToString());
   const char* filename(*val);
@@ -67,15 +72,18 @@ NAN_METHOD(Libxml::load) {
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
   libxml->docPrt = xmlReadFile(filename, NULL, options);
 
+  xmlSetStructuredErrorFunc(NULL, NULL);
+
   if(libxml->docPrt == NULL){
+    // We set property to libxml element only if notWellformed
+    info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
     info.GetReturnValue().Set(Nan::False());
   }else{
     info.GetReturnValue().Set(Nan::True());
   }
 }
 
-NAN_METHOD(Libxml::getDtd)
-{
+NAN_METHOD(Libxml::getDtd){
   Nan::HandleScope scope;
   Libxml* document = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   assert(document);
@@ -116,6 +124,10 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   if (info.Length() < 1){
     return Nan::ThrowTypeError("Load requires at least 1 argument");
   }
+  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+  xmlResetLastError();
+  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+            XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   String::Utf8Value val(info[0]->ToString());
   const char* filenameDtd(*val);
@@ -135,7 +147,7 @@ NAN_METHOD(Libxml::validateAgainstDtd){
     return Nan::ThrowTypeError("ERROR_OCCURED, cannot create validation contexte");
   }
 
-  //Instead we could set this to disbale output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
+  //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
   if (!showErrors) {
     vctxt->userData = (void *) Libxml::errorsHandler;
     vctxt->error = (xmlValidityErrorFunc) Libxml::errorsHandler;
@@ -144,13 +156,16 @@ NAN_METHOD(Libxml::validateAgainstDtd){
 
   // Validation
   dtdValidationResult = xmlValidateDtd(vctxt, libxml->docPrt, dtdPtr);
-  // Libération de la mémoire
+
+  // Libération de la mémoire, erreurs etc
+  xmlSetStructuredErrorFunc(NULL, NULL);
   xmlFreeValidCtxt(vctxt);
   xmlFreeDtd(dtdPtr);
 
   if(dtdValidationResult != 0){
     info.GetReturnValue().Set(Nan::True());
   }else{
+    info.Holder()->Set(Nan::New<v8::String>("validationErrors").ToLocalChecked(), errors);
     info.GetReturnValue().Set(Nan::False());
   }
 }
@@ -179,11 +194,6 @@ NAN_METHOD(Libxml::xpathSelect){
     return Nan::ThrowTypeError("Error: unable to create new XPath context");
   }
 
-  /* Register namespaces from list (if any) */
-  // if((nsList != NULL) && (register_namespaces(xpathCtx, nsList) < 0)) {
-  //   return Nan::ThrowTypeError("Error: failed to register namespaces list");
-  // }
-
   /* Evaluate xpath expression */
   xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
   if(xpathObj == NULL) {
@@ -192,20 +202,6 @@ NAN_METHOD(Libxml::xpathSelect){
   }
   else if(xpathObj) {
     switch (xpathObj->type) {
-    // case XPATH_NODESET: {
-    //   if (xmlXPathNodeSetIsEmpty(xpathObj->nodesetval)) {
-    //     res = Nan::New<v8::Array>(0);
-    //     break;
-    //   }
-
-    //   v8::Local<v8::Array> nodes = Nan::New<v8::Array>(xpathObj->nodesetval->nodeNr);
-    //   for (int i = 0; i != xpathObj->nodesetval->nodeNr; ++i) {
-    //     Nan::Set(nodes, i, xmlNode::New(xpathObj->nodesetval->nodeTab[i]));
-    //   }
-
-    //   res = nodes;
-    //   break;
-    // }
 
     case XPATH_BOOLEAN:
       res = Nan::New<v8::Boolean>(xpathObj->boolval);
@@ -228,7 +224,6 @@ NAN_METHOD(Libxml::xpathSelect){
 
   xmlXPathFreeObject(xpathObj);
   return info.GetReturnValue().Set(scope.Escape(res));
-  // return scope.Escape(res);
 }
 
 void InitLibxml(v8::Local<v8::Object> exports) { Libxml::Init(exports); }

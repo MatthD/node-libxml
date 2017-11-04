@@ -9,6 +9,8 @@
 #include "libxml/xpath.h"
 #include "libxml/xpathInternals.h"
 
+#include "libxml-syntax-error.h"
+
 enum {
   ERROR_OCCURED = -1, // Une erreur est survenue pendant la validation
   NOT_VALID = 0,      // Le document n'est pas valide
@@ -23,7 +25,7 @@ public:
 
 private:
   static void errorsHandler(void *, xmlErrorPtr);
-  explicit Libxml(bool debug = false); 
+  explicit Libxml(); 
   ~Libxml();
   static inline Nan::Persistent<v8::Function>& constructor();
 
