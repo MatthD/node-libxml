@@ -1,3 +1,6 @@
+/**
+* This is the main Class script, We use NAN as a wrapper to libxml2 c+++ functions
+*/
 #include "libxml.h"
 
 #include <algorithm>
@@ -13,14 +16,18 @@ void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
   return;
 };
 
-Libxml::Libxml() {
+Libxml::Libxml(bool manual) {
   //Maybe deport debug activation here ? in the future ..
-   // if(!debug){
-   //  void *  vctxt;
-   //  xmlSetStructuredErrorFunc(vctxt,errorsHandler);
-   // }
+  if(manual){
+    Libxml::manual = true;
+  }
 }
-Libxml::~Libxml() {}
+//Destructor 
+Libxml::~Libxml() {
+  // Free memory dtd & xml file ..
+  xmlFreeDoc(Libxml::docPtr);
+  xmlFreeDtd(Libxml::dtdPtr);
+}
 
 Nan::Persistent<v8::Function>& Libxml::constructor() {
   static Nan::Persistent<v8::Function> myConstructor;
@@ -32,10 +39,12 @@ NAN_MODULE_INIT(Libxml::Init) {
   tpl->SetClassName(Nan::New("Libxml").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Nan::SetPrototypeMethod(tpl, "load", load);
+  Nan::SetPrototypeMethod(tpl, "loadXml", loadXml);
   Nan::SetPrototypeMethod(tpl, "getDtd", getDtd);
   Nan::SetPrototypeMethod(tpl, "xpathSelect", xpathSelect);
   Nan::SetPrototypeMethod(tpl, "validateAgainstDtd", validateAgainstDtd);
+  Nan::SetPrototypeMethod(tpl, "freeDtd", freeDtd);
+  Nan::SetPrototypeMethod(tpl, "freeXml", freeXml);
 
   Local<ObjectTemplate> instTpl = tpl->InstanceTemplate();
 
@@ -45,7 +54,8 @@ NAN_MODULE_INIT(Libxml::Init) {
 
 NAN_METHOD(Libxml::New) {
   if (info.IsConstructCall()) {
-    Libxml* obj = new Libxml();
+    bool manual = info[0]->BooleanValue() || false;
+    Libxml* obj = new Libxml(manual);
     obj->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
   } else {
@@ -56,9 +66,9 @@ NAN_METHOD(Libxml::New) {
   }
 }
 
-NAN_METHOD(Libxml::load) {
+NAN_METHOD(Libxml::loadXml) {
   if (info.Length() < 1){
-    return Nan::ThrowTypeError("Load requires at least 1 argument");
+    return Nan::ThrowTypeError("loadXml requires at least 1 argument");
   }
   v8::Local<v8::Array> errors = Nan::New<v8::Array>();
   xmlResetLastError();
@@ -70,11 +80,13 @@ NAN_METHOD(Libxml::load) {
 
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  libxml->docPrt = xmlReadFile(filename, NULL, options);
+  libxml->docPtr = xmlReadFile(filename, NULL, options);
 
   xmlSetStructuredErrorFunc(NULL, NULL);
 
-  if(libxml->docPrt == NULL){
+  // Free memory only in automatic mode (default), if manuel , do nothing
+
+  if(libxml->docPtr == NULL){
     // We set property to libxml element only if notWellformed
     info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
     info.GetReturnValue().Set(Nan::False());
@@ -85,9 +97,9 @@ NAN_METHOD(Libxml::load) {
 
 NAN_METHOD(Libxml::getDtd){
   Nan::HandleScope scope;
-  Libxml* document = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  assert(document);
-  xmlDtdPtr dtd = xmlGetIntSubset(document->docPrt);
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  assert(libxml);
+  xmlDtdPtr dtd = xmlGetIntSubset(libxml->docPtr);
 
   if (!dtd) {
     return info.GetReturnValue().Set(Nan::Null());
@@ -122,7 +134,7 @@ NAN_METHOD(Libxml::getDtd){
 
 NAN_METHOD(Libxml::validateAgainstDtd){
   if (info.Length() < 1){
-    return Nan::ThrowTypeError("Load requires at least 1 argument");
+    return Nan::ThrowTypeError("validateAgainstDtd requires at least 1 argument");
   }
   v8::Local<v8::Array> errors = Nan::New<v8::Array>();
   xmlResetLastError();
@@ -134,16 +146,15 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   bool showErrors = info[1]->BooleanValue();;
 
   int dtdValidationResult;
-  xmlDtdPtr dtdPtr;
   xmlValidCtxtPtr vctxt;
   xmlChar * fichierDTDCasted = xmlCharStrdup(filenameDtd);
 
-  if ((dtdPtr = xmlParseDTD(NULL, fichierDTDCasted)) == NULL) {
+  if ((libxml->dtdPtr = xmlParseDTD(NULL, fichierDTDCasted)) == NULL) {
     return Nan::ThrowTypeError("ERROR_OCCURED, DTD file is not valid");
   }
   // Création du contexte de validation
   if ((vctxt = xmlNewValidCtxt()) == NULL) {
-    xmlFreeDtd(dtdPtr);
+    xmlFreeDtd(libxml->dtdPtr);
     return Nan::ThrowTypeError("ERROR_OCCURED, cannot create validation contexte");
   }
 
@@ -155,12 +166,11 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   }
 
   // Validation
-  dtdValidationResult = xmlValidateDtd(vctxt, libxml->docPrt, dtdPtr);
+  dtdValidationResult = xmlValidateDtd(vctxt, libxml->docPtr, libxml->dtdPtr);
 
   // Libération de la mémoire, erreurs etc
   xmlSetStructuredErrorFunc(NULL, NULL);
   xmlFreeValidCtxt(vctxt);
-  xmlFreeDtd(dtdPtr);
 
   if(dtdValidationResult != 0){
     info.GetReturnValue().Set(Nan::True());
@@ -168,6 +178,13 @@ NAN_METHOD(Libxml::validateAgainstDtd){
     info.Holder()->Set(Nan::New<v8::String>("validationErrors").ToLocalChecked(), errors);
     info.GetReturnValue().Set(Nan::False());
   }
+
+  // Free dtd only in automatic mode, not manual
+  bool isManual = libxml->manual;
+  if(!isManual){
+    xmlFreeDoc(libxml->docPtr);
+  }
+
 }
 
 NAN_METHOD(Libxml::xpathSelect){
@@ -189,7 +206,7 @@ NAN_METHOD(Libxml::xpathSelect){
   xmlXPathObjectPtr xpathObj;
 
   /* Create xpath evaluation context */
-  xpathCtx = xmlXPathNewContext(libxml->docPrt);
+  xpathCtx = xmlXPathNewContext(libxml->docPtr);
   if(xpathCtx == NULL) {
     return Nan::ThrowTypeError("Error: unable to create new XPath context");
   }
@@ -213,7 +230,7 @@ NAN_METHOD(Libxml::xpathSelect){
 
     case XPATH_STRING:
       res = Nan::New<v8::String>((const char *)xpathObj->stringval,
-                            xmlStrlen(xpathObj->stringval)).ToLocalChecked();
+        xmlStrlen(xpathObj->stringval)).ToLocalChecked();
       break;
 
     default:
@@ -225,6 +242,32 @@ NAN_METHOD(Libxml::xpathSelect){
   xmlXPathFreeObject(xpathObj);
   return info.GetReturnValue().Set(scope.Escape(res));
 }
+
+NAN_METHOD(Libxml::freeXml){
+  Nan::HandleScope scope;
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  // If dtd is already null, just do nothing .. this is to implement
+  // if(libxml->dtdPtr == NULL){
+  //   return;
+  // }
+  // Force clear memory DTD loaded
+  v8::Local<v8::Array> emptyErrors = Nan::New<v8::Array>();
+  info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), emptyErrors);
+  xmlFreeDoc(libxml->docPtr);
+};
+
+NAN_METHOD(Libxml::freeDtd){
+  Nan::HandleScope scope;
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  // If dtd is already null, just do nothing .. this is to implement
+  // if(libxml->dtdPtr == NULL){
+  //   return;
+  // }
+  // Force clear memory DTD loaded
+  v8::Local<v8::Array> emptyErrors = Nan::New<v8::Array>();
+  info.Holder()->Set(Nan::New<v8::String>("validationErrors").ToLocalChecked(), emptyErrors);
+  xmlFreeDtd(libxml->dtdPtr);
+};
 
 void InitLibxml(v8::Local<v8::Object> exports) { Libxml::Init(exports); }
 

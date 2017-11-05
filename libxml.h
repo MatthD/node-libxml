@@ -19,21 +19,28 @@ enum {
 
 class Libxml : public Nan::ObjectWrap {
 public:
+
+  ~Libxml();
+
   static NAN_MODULE_INIT(Init);
-  xmlDocPtr docPrt;
+  bool manual = false;
+  xmlDocPtr docPtr;
+  xmlDtdPtr dtdPtr;
   // Libxml::document* doc;
 
 private:
   static void errorsHandler(void *, xmlErrorPtr);
-  explicit Libxml(); 
-  ~Libxml();
+  explicit Libxml(bool manual = false); 
   static inline Nan::Persistent<v8::Function>& constructor();
 
   static NAN_METHOD(New);
-  static NAN_METHOD(load);
+  static NAN_METHOD(loadXml);
+  //static NAN_METHOD(loadDtd);
   static NAN_METHOD(xpathSelect);
   static NAN_METHOD(getDtd);
   static NAN_METHOD(validateAgainstDtd);
+  static NAN_METHOD(freeXml);
+  static NAN_METHOD(freeDtd);
   
 };
 

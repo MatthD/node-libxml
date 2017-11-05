@@ -1,3 +1,6 @@
+/**
+* This is the Errros Class script, for wellformed & validation DTD
+*/
 #include <cstring>
 #include "libxml-syntax-error.h"
 
