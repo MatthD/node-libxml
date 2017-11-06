@@ -20,10 +20,11 @@ enum {
 class Libxml : public Nan::ObjectWrap {
 public:
 
-  ~Libxml();
+  virtual ~Libxml();
 
   static NAN_MODULE_INIT(Init);
   bool manual = false;
+  bool isDtdLoaded = false;
   xmlDocPtr docPtr;
   xmlDtdPtr dtdPtr;
   // Libxml::document* doc;
@@ -41,6 +42,7 @@ private:
   static NAN_METHOD(validateAgainstDtd);
   static NAN_METHOD(freeXml);
   static NAN_METHOD(freeDtd);
+  static NAN_METHOD(clearAll);
   
 };
 

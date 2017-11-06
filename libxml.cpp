@@ -84,8 +84,6 @@ NAN_METHOD(Libxml::loadXml) {
 
   xmlSetStructuredErrorFunc(NULL, NULL);
 
-  // Free memory only in automatic mode (default), if manuel , do nothing
-
   if(libxml->docPtr == NULL){
     // We set property to libxml element only if notWellformed
     info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
@@ -152,11 +150,15 @@ NAN_METHOD(Libxml::validateAgainstDtd){
   if ((libxml->dtdPtr = xmlParseDTD(NULL, fichierDTDCasted)) == NULL) {
     return Nan::ThrowTypeError("ERROR_OCCURED, DTD file is not valid");
   }
+  
   // Création du contexte de validation
   if ((vctxt = xmlNewValidCtxt()) == NULL) {
     xmlFreeDtd(libxml->dtdPtr);
     return Nan::ThrowTypeError("ERROR_OCCURED, cannot create validation contexte");
   }
+
+  // Important to inform is dtd is loaded
+  libxml->isDtdLoaded = true;
 
   //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
   if (!showErrors) {
@@ -246,28 +248,44 @@ NAN_METHOD(Libxml::xpathSelect){
 NAN_METHOD(Libxml::freeXml){
   Nan::HandleScope scope;
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  // If dtd is already null, just do nothing .. this is to implement
-  // if(libxml->dtdPtr == NULL){
-  //   return;
-  // }
+  //only available on manual mod
+  if(!(libxml->manual)){
+    return;
+  }
+  bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("wellformedErrors").ToLocalChecked()).FromMaybe(false);
+  // If doc is already null, just do nothing and only available on manual mod
+  if(libxml->docPtr == NULL || !(libxml->manual)){
+    return;
+  }
   // Force clear memory DTD loaded
-  v8::Local<v8::Array> emptyErrors = Nan::New<v8::Array>();
-  info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), emptyErrors);
   xmlFreeDoc(libxml->docPtr);
 };
 
 NAN_METHOD(Libxml::freeDtd){
   Nan::HandleScope scope;
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  // If dtd is already null, just do nothing .. this is to implement
-  // if(libxml->dtdPtr == NULL){
-  //   return;
-  // }
+  //only available on manual mod
+  if(!(libxml->manual)){
+    return;
+  }
+  bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationErrors").ToLocalChecked()).FromMaybe(false);
+  // If dtd is already null, just do nothing
+  if(!(libxml->isDtdLoaded)){
+    return;
+  }
   // Force clear memory DTD loaded
-  v8::Local<v8::Array> emptyErrors = Nan::New<v8::Array>();
-  info.Holder()->Set(Nan::New<v8::String>("validationErrors").ToLocalChecked(), emptyErrors);
   xmlFreeDtd(libxml->dtdPtr);
 };
+
+NAN_METHOD(Libxml::clearAll){
+  Nan::HandleScope scope;
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  // This method is only available on manual mod
+  if(!libxml->manual){
+    return;
+  }
+  xmlCleanupParser();
+}
 
 void InitLibxml(v8::Local<v8::Object> exports) { Libxml::Init(exports); }
 

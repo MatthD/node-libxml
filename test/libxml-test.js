@@ -77,8 +77,7 @@ describe('Node-Libxml', function () {
     expect(nbElementsInXpath).to.be.a('number');
     expect(nbElementsInXpath).to.equal(4);
   });
-  // Should free memory when asked
-  it('should free memory when asked (on not wellformed xml for this eg)', function () {
+  it('should not free XML memory & infos when asked in manual mod On not wellformed xml', function () {
     let libxml = new Libxml();
     let notWellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
     expect(notWellformed).to.be.false;
@@ -87,7 +86,24 @@ describe('Node-Libxml', function () {
     expect(libxml.wellformedErrors.length).to.be.at.least(1);
     libxml.freeXml();
     expect(libxml.wellformedErrors).to.be.an('array');
-    expect(libxml.wellformedErrors.length).to.be.equal(0);
+    expect(libxml.wellformedErrors.length).to.be.at.least(1)
+  });
+  it('should free XML memory & infos when asked in manual mod On not wellformed xml', function () {
+    let libxml = new Libxml(true);
+    let notWellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
+    expect(notWellformed).to.be.false;
+    expect(libxml).to.have.property('wellformedErrors');
+    expect(libxml.wellformedErrors).to.be.an('array');
+    expect(libxml.wellformedErrors.length).to.be.at.least(1);
+    libxml.freeXml();
+    expect(libxml).not.to.have.property('wellformedErrors');
+  });
+  it('should free XML memory & infos when asked in manual mod wellformed xml ', function () {
+    let libxml = new Libxml(true);
+    let wellFormed = libxml.loadXml('test/data/test-default.xml');
+    expect(wellFormed).to.be.true;
+    expect(libxml).not.to.have.property('wellformedErrors');
+    libxml.freeXml();
+    expect(libxml).not.to.have.property('wellformedErrors');
   });
 });
-
