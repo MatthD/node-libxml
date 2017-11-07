@@ -45,6 +45,7 @@ NAN_MODULE_INIT(Libxml::Init) {
   Nan::SetPrototypeMethod(tpl, "validateAgainstDtd", validateAgainstDtd);
   Nan::SetPrototypeMethod(tpl, "freeDtd", freeDtd);
   Nan::SetPrototypeMethod(tpl, "freeXml", freeXml);
+  Nan::SetPrototypeMethod(tpl, "clearAll", clearAll);
 
   Local<ObjectTemplate> instTpl = tpl->InstanceTemplate();
 

@@ -156,4 +156,8 @@ describe('Node-Libxml', function () {
     expect(libxml.validationErrors).to.be.an('array');
     expect(libxml.validationErrors.length).to.be.at.least(1);
   });
+  it('Should not throw error when use clearAll function to clear all memory libxml', function () {
+    let libxml = new Libxml();
+    libxml.clearAll();
+  });
 });
