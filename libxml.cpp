@@ -157,9 +157,6 @@ NAN_METHOD(Libxml::validateAgainstDtd){
     return Nan::ThrowTypeError("ERROR_OCCURED, cannot create validation contexte");
   }
 
-  // Important to inform is dtd is loaded
-  libxml->isDtdLoaded = true;
-
   //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
   if (!showErrors) {
     vctxt->userData = (void *) Libxml::errorsHandler;
@@ -254,11 +251,12 @@ NAN_METHOD(Libxml::freeXml){
   }
   bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("wellformedErrors").ToLocalChecked()).FromMaybe(false);
   // If doc is already null, just do nothing and only available on manual mod
-  if(libxml->docPtr == NULL || !(libxml->manual)){
+  if(libxml->docPtr == NULL){
     return;
   }
   // Force clear memory DTD loaded
   xmlFreeDoc(libxml->docPtr);
+  libxml->docPtr = nullptr;
 };
 
 NAN_METHOD(Libxml::freeDtd){
@@ -270,11 +268,12 @@ NAN_METHOD(Libxml::freeDtd){
   }
   bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationErrors").ToLocalChecked()).FromMaybe(false);
   // If dtd is already null, just do nothing
-  if(!(libxml->isDtdLoaded)){
+  if(libxml->dtdPtr == NULL){
     return;
   }
   // Force clear memory DTD loaded
   xmlFreeDtd(libxml->dtdPtr);
+  libxml->dtdPtr = nullptr;
 };
 
 NAN_METHOD(Libxml::clearAll){

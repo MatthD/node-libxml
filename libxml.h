@@ -24,7 +24,6 @@ public:
 
   static NAN_MODULE_INIT(Init);
   bool manual = false;
-  bool isDtdLoaded = false;
   xmlDocPtr docPtr;
   xmlDtdPtr dtdPtr;
   // Libxml::document* doc;
