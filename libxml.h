@@ -35,12 +35,11 @@ private:
 
   static NAN_METHOD(New);
   static NAN_METHOD(loadXml);
-  //static NAN_METHOD(loadDtd);
+  static NAN_METHOD(loadDtd);
   static NAN_METHOD(xpathSelect);
   static NAN_METHOD(getDtd);
   static NAN_METHOD(validateAgainstDtd);
   static NAN_METHOD(freeXml);
-  static NAN_METHOD(freeDtd);
   static NAN_METHOD(clearAll);
   
 };

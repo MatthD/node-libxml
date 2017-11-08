@@ -127,7 +127,6 @@ describe('Node-Libxml', function () {
     expect(libxml.wellformedErrors).to.be.an('array');
     expect(libxml.wellformedErrors.length).to.be.at.least(1);
     libxml.freeXml();
-    libxml.freeDtd();
     notWellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
     notwellformedV = libxml.validateAgainstDtd('test/dtd/mydoctype.dtd');
     expect(notWellformed).to.be.false;
@@ -146,7 +145,6 @@ describe('Node-Libxml', function () {
     expect(libxml).to.have.property('validationErrors');
     expect(libxml.validationErrors).to.be.an('array');
     expect(libxml.validationErrors.length).to.be.at.least(1);
-    libxml.freeDtd();
     libxml.freeXml();
     let testValidWf = libxml.loadXml('test/data/test-default.xml');
     let testValid = libxml.validateAgainstDtd('test/dtd/myBADdoctype.dtd');
