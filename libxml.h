@@ -2,9 +2,13 @@
 #define LIBXML_H
 
 #include <nan.h>
+#include <string>
+#include <vector>
 
 #include "libxml/parser.h"
 #include "libxml/valid.h"
+#include "libxml/xmlschemastypes.h"
+#include "libxml/xmlschemas.h"
 #include "libxml/tree.h"
 #include "libxml/xpath.h"
 #include "libxml/xpathInternals.h"
@@ -17,29 +21,34 @@ enum {
   VALID = 1           // Le document est valide
 };
 
+using namespace std;
+
 class Libxml : public Nan::ObjectWrap {
 public:
 
-  virtual ~Libxml();
+  ~Libxml();
 
   static NAN_MODULE_INIT(Init);
-  bool manual = false;
-  xmlDocPtr docPtr;
-  xmlDtdPtr dtdPtr;
-  // Libxml::document* doc;
+  xmlDocPtr docPtr = NULL;
+  vector<xmlDtdPtr> dtdsPaths;
+  vector<xmlSchemaPtr> schemasPaths;
 
 private:
   static void errorsHandler(void *, xmlErrorPtr);
-  explicit Libxml(bool manual = false); 
+  explicit Libxml(); 
   static inline Nan::Persistent<v8::Function>& constructor();
 
   static NAN_METHOD(New);
   static NAN_METHOD(loadXml);
-  static NAN_METHOD(loadDtd);
+  static NAN_METHOD(loadDtds);
+  static NAN_METHOD(loadSchemas);
+  static NAN_METHOD(validateAgainstDtds);
+  static NAN_METHOD(validateAgainstSchemas);
   static NAN_METHOD(xpathSelect);
   static NAN_METHOD(getDtd);
-  static NAN_METHOD(validateAgainstDtd);
   static NAN_METHOD(freeXml);
+  static NAN_METHOD(freeDtds);
+  static NAN_METHOD(freeSchemas);
   static NAN_METHOD(clearAll);
   
 };

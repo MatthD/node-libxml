@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/MARC21/slim file:///applis/istex/home/li/li-prep/src/javaProject/etc/xsd/MARC21slim.xsd">
+  <record>
+    <leader>01714nam  2200325Ia 4500</leader>
+    <controlfield tag="001">ocm11985480e </controlfield>
+    <controlfield tag="003">OCoLC</controlfield>
+    <controlfield tag="005">19890711162336.0</controlfield>
+    <controlfield tag="006">m    g   d        </controlfield>
+    <controlfield tag="007">cr bn |||a|bb|</controlfield>
+    <controlfield tag="008">850501s1684    enk     s     00| | eng d</controlfield>
+    <datafield ind1=" " ind2=" " tag="037">
+      <subfield code="a">CL0037000002</subfield>
+      <subfield code="b">ProQuest Information and Learning. 300 N. Zeeb Rd., Ann Arbor, MI 48106</subfield>
+    </datafield>
+  </record>
+</collection>

@@ -1,0 +1,8 @@
+<!ELEMENT xpath (to)>
+<!ELEMENT to (my)>
+<!ELEMENT my (infos,infosdust)>
+<!ATTLIST infos
+xmlns CDATA #FIXED ''
+attrib NMTOKEN #IMPLIED>
+<!ELEMENT infos (#PCDATA)>
+<!ELEMENT infosdust (#PCDATA)>
