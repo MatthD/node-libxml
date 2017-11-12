@@ -6,11 +6,13 @@ LibXML2 Node.js Wrapper to Check: Wellformed, Validity against DTD, against XSD(
 ## Requirements: 
 
 Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it as it comes :)
-Works on : Linux, Osx & Windows 
+
+Works on : Linux, Osx & Windows (no 32bits, just 64 bits) 
+
 Node: Already built for all LTS node (4,6,8)
 
 ## Why use it 
-Node-libxml has been thought differently than; whereas libxmljs can be use in commun uses, you can use node-libxml if:
+Node-libxml has been thought differently than [libxmljs](https://github.com/libxmljs/libxmljs); whereas libxmljs can be use in commun uses, you can use node-libxml if:
 - You wan to validate against DTD (libxmljs can't)
 - You want a silent program if xml is not wellformed (node-libxml returns wellformed error in object; libxmljs throws)
 - You want to do xml processing in parallel forks
