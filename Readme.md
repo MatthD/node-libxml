@@ -74,6 +74,7 @@ A function of libxml to load the DTDs files
 A function of libxml to load the XSDs files
 `TAKE an array of path of & RETURN nothing`
 `SET a an array 'schemasLoadedErrors' in libxml element IF error happend on loading xsd(s)`
+[ex](./test/libxml-test.js#L157)
 
 
 #### Validating functions
@@ -101,11 +102,12 @@ A function of libxml to validate against the previously loaded DTD(s)
 A function of libxml to evaluate the xpath on the previously loaded XML
 `TAKE string & RETURN value depending on what you asked (number, boolean..)`
 `RETURN null if no match`
+[ex](./test/libxml-test.js#L69)
 
 
 #### Memory management
-
 Use those functions when you have finished jobs of elements, or before overwrite them.
+[ex](./test/libxml-test.js#100)
 
 
 ##### freeXml()
