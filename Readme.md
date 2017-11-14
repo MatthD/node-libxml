@@ -1,7 +1,14 @@
 Node-LibXML
 ==========
 
-LibXML2 Node.js Wrapper to Check: Wellformed, Validity against DTD, against XSD(schema), get doctype & getXpath elements
+Node-Libxml is a LibXML2 Node.js Wrapper 
+
+It can perform:  
+
+- Wellformed check & rerror report
+- Validity against DTD/XSD(Schema) check, 
+- Get doctype informations (about dtd)
+- GetXpath Values
 
 ## Requirements: 
 
@@ -56,7 +63,7 @@ check [tests](./test/libxml-test.js) for more examples
 ## API
 
 
-#### Loading functions
+### Loading functions
 
 
 
@@ -79,7 +86,7 @@ A function of libxml to load the XSDs files
 [ex](./test/libxml-test.js#L157)
 
 
-#### Validating functions
+### Validating functions
 
 
 ##### validateAgainstDtd()
@@ -97,7 +104,12 @@ A function of libxml to validate against the previously loaded DTD(s)
 `SET a an array 'validationDtdErrors' in libxml element if no dtd has validate`
 
 
-#### Get informations of the the XML
+### Get informations of the the XML
+
+
+#### getDtd()
+A function of libxml to evaluate the xpath on the previously loaded XML
+`TAKE nothin & RETURN an object containing name,externalId & systemId`
 
 
 #### xpathSelect(string)
@@ -107,7 +119,7 @@ A function of libxml to evaluate the xpath on the previously loaded XML
 [ex](./test/libxml-test.js#L69)
 
 
-#### Memory management
+### Memory management
 Use those functions when you have finished jobs of elements, or before overwrite them.
 [ex](./test/libxml-test.js#100)
 
