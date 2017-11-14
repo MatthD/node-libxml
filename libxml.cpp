@@ -220,10 +220,6 @@ NAN_METHOD(Libxml::loadSchemas){
 }
 
 NAN_METHOD(Libxml::validateAgainstDtds){
-  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
-  xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
 
   if(libxml->dtdsPaths.empty()){
@@ -242,6 +238,10 @@ NAN_METHOD(Libxml::validateAgainstDtds){
 
   for (vector<xmlDtdPtr>::iterator dtd = libxml->dtdsPaths.begin(); dtd != libxml->dtdsPaths.end() ; ++dtd){
     const char* dtdName = (const char *)(*dtd)->SystemID;
+    v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+    xmlResetLastError();
+    xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+              XmlSyntaxError::PushToArray);
     Local<String> SystemIDString = Nan::New<String>(dtdName).ToLocalChecked();
     // Création du contexte de validation
     xmlValidCtxtPtr vctxt;
@@ -279,10 +279,6 @@ NAN_METHOD(Libxml::validateAgainstDtds){
 }
 
 NAN_METHOD(Libxml::validateAgainstSchemas){
-  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
-  xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
 
   if(libxml->schemasPaths.empty()){
@@ -300,6 +296,10 @@ NAN_METHOD(Libxml::validateAgainstSchemas){
   Local<Object> errorsValidations = Nan::New<Object>();
 
   for (vector<xmlSchemaPtr>::iterator xsd = libxml->schemasPaths.begin(); xsd != libxml->schemasPaths.end() ; ++xsd){
+    v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+    xmlResetLastError();
+    xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+            XmlSyntaxError::PushToArray);
     const char* xsdName = (const char *)(*xsd)->doc->URL;
     Local<String> urlSchema = Nan::New<String>(xsdName).ToLocalChecked();
     // Création du contexte de validation
@@ -375,6 +375,7 @@ NAN_METHOD(Libxml::xpathSelect){
     }
   }
   xmlXPathFreeObject(xpathObj);
+  xmlXPathFreeContext(xpathCtx);
   return info.GetReturnValue().Set(scope.Escape(res));
 }
 
