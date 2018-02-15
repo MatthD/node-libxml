@@ -35,11 +35,12 @@ describe('Node-Libxml', function () {
     let libxml = new Libxml();
     let testInvalidWf = libxml.loadXml('test/data/test-not-valid-dtd.xml');
     libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-    let testInvalid = libxml.validateAgainstDtds();
+    let testInvalid = libxml.validateAgainstDtds(3);
     expect(testInvalidWf).to.be.true;
     expect(testInvalid).to.be.false;
     expect(libxml).to.have.property('validationDtdErrors');
     expect(libxml.validationDtdErrors).to.be.an('object');
+    expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
     libxml.freeDtds();
     libxml.freeXml();
   });

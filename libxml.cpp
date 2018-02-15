@@ -227,6 +227,10 @@ NAN_METHOD(Libxml::validateAgainstDtds){
     return;
   }
 
+  if(int newMaxNbError = info[0]->IntegerValue()){
+    XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
+  }
+
   //Setting contexte of validation 
   const char* dtdValidationErrorsPath;
   bool oneOfTheDtdValidate = false;
@@ -238,6 +242,7 @@ NAN_METHOD(Libxml::validateAgainstDtds){
 
   for (vector<xmlDtdPtr>::iterator dtd = libxml->dtdsPaths.begin(); dtd != libxml->dtdsPaths.end() ; ++dtd){
     const char* dtdName = (const char *)(*dtd)->SystemID;
+    //Local<Array> errors = New<v8::Array>(3);
     v8::Local<v8::Array> errors = Nan::New<v8::Array>();
     xmlResetLastError();
     xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
@@ -286,6 +291,9 @@ NAN_METHOD(Libxml::validateAgainstSchemas){
     return;
   }
 
+  if(int newMaxNbError = info[0]->IntegerValue()){
+    XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
+  }
   //Setting contexte of validation 
   const char* schemaValidationErrorsPath;
   bool oneOfTheSchemaValidate = false;

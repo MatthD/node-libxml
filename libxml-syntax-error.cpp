@@ -2,6 +2,7 @@
 * This is the Errros Class script, for wellformed & validation DTD
 */
 #include <cstring>
+#include <iostream>
 #include "libxml-syntax-error.h"
 
 void setStringField(v8::Local<v8::Object> obj, const char* name, const char* value) {
@@ -37,12 +38,20 @@ XmlSyntaxError::BuildSyntaxError(xmlError* error) {
   return scope.Escape(err);
 }
 
+int XmlSyntaxError::maxError {100};
+
+void XmlSyntaxError::ChangeMaxNumberOfError(int max){
+  XmlSyntaxError::maxError = max;
+}
+
 void
 XmlSyntaxError::PushToArray(void* errs, xmlError* error) {
   Nan::HandleScope scope;
   v8::Local<v8::Array> errors = *reinterpret_cast<v8::Local<v8::Array>*>(errs);
+  if(errors->Length() >= maxError){
+    return;
+  }
   v8::Local<v8::Function> push = v8::Local<v8::Function>::Cast(errors->Get(Nan::New<v8::String>("push").ToLocalChecked()));
-
   v8::Local<v8::Value> argv[1] = { XmlSyntaxError::BuildSyntaxError(error) };
   push->Call(errors, 1, argv);
 }

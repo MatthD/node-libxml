@@ -6,7 +6,10 @@
 #include "libxml.h"
 
 class XmlSyntaxError {
+  static int maxError;
 public:
+  static void ChangeMaxNumberOfError(int max);
+
   // push xmlError onto v8::Array
   static void PushToArray(void* errs, xmlError* error);
 
