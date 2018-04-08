@@ -40,7 +40,9 @@ private:
 
   static NAN_METHOD(New);
   static NAN_METHOD(loadXml);
+  static NAN_METHOD(loadXmlFromString);
   static NAN_METHOD(loadDtds);
+  // static NAN_METHOD(loadDtdsFromString);
   static NAN_METHOD(loadSchemas);
   static NAN_METHOD(validateAgainstDtds);
   static NAN_METHOD(validateAgainstSchemas);

@@ -9,6 +9,7 @@ It can perform:
 - Validity against DTD/XSD(Schema) check, 
 - Get doctype informations (about dtd)
 - GetXpath Values
+- Load XMl from string or file path
 
 ## Requirements: 
 
@@ -23,6 +24,7 @@ Node-libxml has been thought differently than [libxmljs](https://github.com/libx
 - You wan to validate against DTD (libxmljs can't)
 - You want a silent program if xml is not wellformed (node-libxml returns wellformed error in object; libxmljs throws)
 - You want to do xml processing in parallel forks
+- You want to load XML from file path OR string
 - You want to validate against DTD / schema on multiple documents with just ONE dtd/schema loaded in memory (libxmljs loads it on each validation request), so it's clearly by far fastest!
 
 
@@ -40,6 +42,8 @@ Node-libxml has been thought differently than [libxmljs](https://github.com/libx
   let libxml = new Libxml();
 
   let xmlIsWellformed = libxml.loadXml('path/to/xml');
+  let xmlIsWellformedStr = libxml.loadXmlFromString('<name>test</name>');
+
   console.log(xmlIsWellformed);
   console.log(xmlIsWellformed.wellformedErrors);
 
@@ -70,6 +74,11 @@ check [tests](./test/libxml-test.js) for more examples
 ##### loadXml(string)
 A function of libxml to load the XML file
 `TAKE a path & RETURN true if wellformed | false if not`
+`SET a an array 'wellformedErrors' in libxml element containing wellformed errors`
+
+##### loadXmlFromString(string)
+A function of libxml to create the xml Dom from a string
+`TAKE a string containing xml & RETURN true if wellformed | false if not`
 `SET a an array 'wellformedErrors' in libxml element containing wellformed errors`
 
 

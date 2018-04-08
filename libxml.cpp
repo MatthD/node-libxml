@@ -41,7 +41,9 @@ NAN_MODULE_INIT(Libxml::Init) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   Nan::SetPrototypeMethod(tpl, "loadXml", loadXml);
+  Nan::SetPrototypeMethod(tpl, "loadXmlFromString", loadXmlFromString);
   Nan::SetPrototypeMethod(tpl, "loadDtds", loadDtds);
+  // Nan::SetPrototypeMethod(tpl, "loadDtdsFromString", loadDtdsFromString);
   Nan::SetPrototypeMethod(tpl, "loadSchemas", loadSchemas);
   Nan::SetPrototypeMethod(tpl, "validateAgainstDtds", validateAgainstDtds);
   Nan::SetPrototypeMethod(tpl, "validateAgainstSchemas", validateAgainstSchemas);
@@ -91,6 +93,36 @@ NAN_METHOD(Libxml::loadXml) {
     libxml->docPtr = nullptr;
   }
   libxml->docPtr = xmlReadFile(filename, NULL, options);
+  xmlSetStructuredErrorFunc(NULL, NULL);
+
+  if(libxml->docPtr == NULL){
+    // We set property to libxml element only if notWellformed
+    info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
+    info.GetReturnValue().Set(Nan::False());
+  }else{
+    info.GetReturnValue().Set(Nan::True());
+  }
+}
+
+NAN_METHOD(Libxml::loadXmlFromString) {
+  if (info.Length() < 1){
+    return Nan::ThrowTypeError("loadXmlFromString requires at least 1 argument");
+  }
+  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+  xmlResetLastError();
+  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+            XmlSyntaxError::PushToArray);
+  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  String::Utf8Value str(info[0]->ToString());
+  string txt (*str);
+  // Those options shoudl be send by the user, it enable/disbale errors, warnings ..
+  int options;
+  options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
+  if(libxml->docPtr != NULL){
+    xmlFreeDoc(libxml->docPtr);
+    libxml->docPtr = nullptr;
+  }
+  libxml->docPtr = xmlReadMemory(txt.c_str(), txt.length(), NULL, NULL, options);
   xmlSetStructuredErrorFunc(NULL, NULL);
 
   if(libxml->docPtr == NULL){
@@ -172,6 +204,58 @@ NAN_METHOD(Libxml::loadDtds){
     info.Holder()->Set(Nan::New<v8::String>("dtdsLoadedErrors").ToLocalChecked(), errors);
   }
 }
+
+// NAN_METHOD(Libxml::loadDtdsFromString){
+//   if (info.Length() < 1){
+//     return Nan::ThrowTypeError("loadDtds requires at least 1 argument, an array of DTDs");
+//   }
+//   if(!info[0]->IsArray()){
+//     return Nan::ThrowTypeError("loadDtds requires an array");
+//   }
+//   Nan::EscapableHandleScope scope;
+//   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+//   Local<Array> dtdsStrLocal = Local<Array>::Cast(info[0]);
+//   Local<Array> errors = Nan::New<Array>();
+//   int options;
+//   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
+//   // disbale errors erreurs etc
+//   //v8::Local<v8::Array> errorsDTD = Nan::New<v8::Array>();
+//   xmlResetLastError();
+//   xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+//             XmlSyntaxError::PushToArray);
+//   for (unsigned int i = 0; i < dtdsStrLocal->Length(); i++){
+//     if (Nan::Has(dtdsStrLocal, i).FromJust() && Nan::Get(dtdsStrLocal, i).ToLocalChecked()->IsString()) {
+//       Local<String> value = Nan::Get(dtdsStrLocal, i).ToLocalChecked()->ToString();
+//       String::Utf8Value strV8(value->ToString());
+//       string pathStr (*strV8);
+//       xmlDocPtr dtdDoc = xmlReadMemory(pathStr.c_str(),pathStr.length(),NULL,NULL,options);;
+//       if (dtdDoc == NULL) {
+//         //DTD is bad, we set error and not assign it + next
+//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+//         continue;
+//       }
+//       // Parse DTD from memory
+//       xmlParserInputBufferPtr dtdBuf = xmlParserInputBufferCreateMem(pathStr.c_str(), pathStr.size(),
+//                                                                XML_CHAR_ENCODING_UTF8);
+//       if (!dtdBuf) {
+//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+//         continue;
+//       }
+//       xmlDtdPtr pDtd = xmlIOParseDTD(NULL, dtdBuf, XML_CHAR_ENCODING_UTF8);
+//       if (pDtd == NULL) {
+//         xmlFreeDtd(pDtd);
+//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+//         continue;
+//       }
+//       libxml->dtdsPaths.push_back(pDtd);
+//     }
+//   }
+//   xmlSetStructuredErrorFunc(NULL, NULL);
+//   // We set dtdsLoadedErrors property for js side
+//   if(errors->Length()){
+//     info.Holder()->Set(Nan::New<v8::String>("dtdsLoadedErrors").ToLocalChecked(), errors);
+//   }
+// }
 
 NAN_METHOD(Libxml::loadSchemas){
   if (info.Length() < 1){

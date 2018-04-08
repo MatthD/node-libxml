@@ -2,6 +2,7 @@
 
 const Libxml = require('../index.js');
 const expect = require('chai').expect;
+const fs = require('fs');
 
 describe('Node-Libxml', function () {
   it('Should return a list of errored path if dtd path is bad', function () {
@@ -24,16 +25,56 @@ describe('Node-Libxml', function () {
     libxml.freeXml();
     libxml.freeDtds();
   });
+  // it('Should return wellformed & valid on a wellformed & valid xml From String', function () {
+  //   let libxml = new Libxml();
+  //   let testDefaultStr = fs.readFileSync('test/data/test-default.xml','utf8');
+  //   let myDtd = "<!ELEMENT xpath (to)>\n" +
+  //     "<!ELEMENT to (my)>\n" +
+  //     "<!ELEMENT my (infos,infosdust)>\n" +
+  //     "<!ATTLIST infos\n" +
+  //     "xmlns CDATA #FIXED ''\n" +
+  //     "attrib NMTOKEN #IMPLIED>\n" +
+  //     "<!ELEMENT infos (#PCDATA)>\n" +
+  //     "<!ELEMENT infosdust (#PCDATA)>";
+  //   let testDefaultWf = libxml.loadXmlFromString(testDefaultStr);
+  //   libxml.loadDtdsFromString([myDtd]);
+  //   let testDefaultV = libxml.validateAgainstDtds();
+  //   expect(testDefaultWf).to.be.true;
+  //   expect(testDefaultV).to.be.a('string');
+  //   libxml.freeXml();
+  //   libxml.freeDtds();
+  // });
   it('should return wellformed on a wellformed XMl in utf8-bom & other encoding', function () {
     let libxml = new Libxml();
     let testNotUtf8 = libxml.loadXml('test/data/test-default-not-utf8.xml');
     expect(testNotUtf8).to.be.true
     libxml.freeXml();
   });
+  it('should return wellformed on a wellformed XMl in utf8-bom & other encoding FROM STRING', function () {
+    let libxml = new Libxml();
+    let defaultNotUtf8 = fs.readFileSync('test/data/test-default-not-utf8.xml','utf8');
+    let testNotUtf8 = libxml.loadXmlFromString(defaultNotUtf8);
+    expect(testNotUtf8).to.be.true;
+    libxml.freeXml();
+  });
   // Wellformed & invalid
   it('Should return wellformed & invalid on a wellformed BUT invalid xml', function () {
     let libxml = new Libxml();
     let testInvalidWf = libxml.loadXml('test/data/test-not-valid-dtd.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let testInvalid = libxml.validateAgainstDtds(3);
+    expect(testInvalidWf).to.be.true;
+    expect(testInvalid).to.be.false;
+    expect(libxml).to.have.property('validationDtdErrors');
+    expect(libxml.validationDtdErrors).to.be.an('object');
+    expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
+    libxml.freeDtds();
+    libxml.freeXml();
+  });
+  it('Should return wellformed & invalid on a wellformed BUT invalid xml FROM STRING XML', function () {
+    let libxml = new Libxml();
+    let testInvalidWfStr = fs.readFileSync('test/data/test-not-valid-dtd.xml');
+    let testInvalidWf = libxml.loadXmlFromString(testInvalidWfStr);
     libxml.loadDtds(['test/dtd/mydoctype.dtd']);
     let testInvalid = libxml.validateAgainstDtds(3);
     expect(testInvalidWf).to.be.true;
