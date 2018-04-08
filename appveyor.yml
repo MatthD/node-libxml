@@ -15,9 +15,9 @@ install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   # Upgrade npm
   # - npm install -g npm
-  - npm install -g npm
+  - npm install -g npm@5.5.1
   - set PATH=%APPDATA%\npm;%PATH%
-  - npm i nan
+  - npm i nan@2.7.0
   - npm install -g node-pre-gyp@0.6.39
   - npm install -g node-pre-gyp-github
 
