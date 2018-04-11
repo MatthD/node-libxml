@@ -45,14 +45,14 @@ Node-libxml has been thought differently than [libxmljs](https://github.com/libx
   let xmlIsWellformedStr = libxml.loadXmlFromString('<name>test</name>');
 
   console.log(xmlIsWellformed);
-  console.log(xmlIsWellformed.wellformedErrors);
+  console.log(libxml.wellformedErrors);
 
   console.log(libxml.getDtd());
 
   libxml.loadDtds(['path/to/dtd1', 'path/to/dtd2']);
-  let xmlIsValid = libxml.validateAgainstDtd();
+  let xmlIsValid = libxml.validateAgainstDtds();
   console.log(xmlIsValid);
-  console.log(xmlIsValid.validationDtdErrors);
+  console.log(libxml.validationDtdErrors);
 
   //Get some xpaths;
   let aRandomPathBoolean = libxml.xpathSelect('boolean(//some/path'));
