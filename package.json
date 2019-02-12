@@ -11,6 +11,9 @@
     "test": "mocha",
     "install": "node-pre-gyp install --fallback-to-build"
   },
+  "bin": {
+    "node-pre-gyp": "./node_modules/node-pre-gyp/bin/node-pre-gyp"
+  },
   "author": "MatthD",
   "license": "MIT",
   "dependencies": {

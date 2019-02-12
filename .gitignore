@@ -147,8 +147,8 @@ build/Release
 
 # Dependency directories
 node_modules/*
-!node_modules/.bin/
-!node_modules/.bin/node-pre-gyp
+#!node_modules/.bin/
+#!node_modules/.bin/node-pre-gyp
 !node_modules/node-pre-gyp/
 !node_modules/node-pre-gyp/**/*
 node_modules/node-pre-gyp/node_modules/*
