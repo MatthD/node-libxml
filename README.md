@@ -1,31 +1,31 @@
-Node-LibXML
+node-libxml
 ==========
 
-Node-Libxml is a LibXML2 Node.js Wrapper 
+node-libxml is a LibXML2 Node.js Wrapper 
 
 It can perform:  
 
-- Wellformed check & rerror report
-- Validity against DTD/XSD(Schema) check, 
-- Get doctype informations (about dtd)
-- GetXpath Values
-- Load XMl from string or file path
+- Wellformed check & error report
+- Validity against DTD/XSD (Schema) check, 
+- Get doctype information (about DTD)
+- Get XPath values
+- Load XML from string or file path
 
 ## Requirements: 
 
-Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it as it comes :)
+Node-Libxml has no dependencies, it's fully bundled, so you can just use it as it comes :)
 
-Works on : Linux, Osx & Windows (no 32bits, just 64 bits) 
+Works on : Linux, MacOS & Windows (64-bit only)
 
 Node: Already built for all LTS node (4,6,8)
 
 ## Why use it 
-Node-libxml has been thought differently than [libxmljs](https://github.com/libxmljs/libxmljs); whereas libxmljs can be use in commun uses, you can use node-libxml if:
+node-libxml has been thought differently than [libxmljs](https://github.com/libxmljs/libxmljs); whereas libxmljs can be use in commun uses, you can use node-libxml if:
 - You wan to validate against DTD (libxmljs can't)
-- You want a silent program if xml is not wellformed (node-libxml returns wellformed error in object; libxmljs throws)
-- You want to do xml processing in parallel forks
+- You want a silent program if XML is not wellformed (node-libxml returns wellformed error in object; libxmljs throws)
+- You want to do XML processing in parallel forks
 - You want to load XML from file path OR string
-- You want to validate against DTD / schema on multiple documents with just ONE dtd/schema loaded in memory (libxmljs loads it on each validation request), so it's clearly by far fastest!
+- You want to validate against DTD/XSD on multiple documents with just one DTD/XSD file loaded in memory (libxmljs loads it on each validation request, so it's clearly by far fastest!)
 
 
 
