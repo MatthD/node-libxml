@@ -43,6 +43,8 @@ test: off
 artifacts:
   - path: .\build\stage
 on_success:
+    on:
+      branch: master
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
   - git config --global user.email "matthias.dieudonne@gmail.com"
