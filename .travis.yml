@@ -6,6 +6,7 @@ os:
  
 env:
   matrix:
+    - NODE_VERSION="10.15"
     - NODE_VERSION="8.6"
     - NODE_VERSION="6.11"
     - NODE_VERSION="4.4"
