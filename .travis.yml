@@ -38,7 +38,15 @@ install:
 - node-pre-gyp package
 
 script:
-- node-pre-gyp-github publish --release
-
+- |
+  PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
+  RELEASE_VERSION=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+  if [ "$PACKAGE_VERSION" = "$RELEASE_VERSION" ]
+  then
+    echo "Version PACKAGE_VERSION already released
+  else
+    node-pre-gyp-github publish
+  fi
+ 
 notifications:
   email: false
