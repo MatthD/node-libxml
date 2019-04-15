@@ -35,7 +35,7 @@ install:
   - set PATH=%APPDATA%\npm;%PATH%
   - npm i nan@%nan_version%
   - npm install -g node-pre-gyp@%pre_gyp_version%
-  - npm install -g node-pre-gyp-github@%pre_gyp_version%
+  - npm install -g node-pre-gyp-github@%pre_gyp_github_version%
 
 build_script:
   - node-pre-gyp configure
