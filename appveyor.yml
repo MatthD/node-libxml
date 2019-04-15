@@ -10,25 +10,23 @@ environment:
     - nodejs_version: 8.6
       platform: x64
       npm_version: 6.4.1
-      nan_version: 2.13.2	
-      pre_gyp_version: 0.12.0	  
+      nan_version: 2.13.2    
+      pre_gyp_version: 0.12.0      
     - nodejs_version: 6.11
       platform: x64
       npm_version: 6.4.1
       nan_version: 2.13.2
-      pre_gyp_version: 0.12.0	  
+      pre_gyp_version: 0.12.0      
     - nodejs_version: 4.8
       platform: x64
       npm_version: 5.5.1
       nan_version: 2.7.0
-      pre_gyp_version: 0.6.39	  
+      pre_gyp_version: 0.6.39      
 
 cache:
   - '%APPDATA%\npm-cache'
 install:
   - ps: Install-Product node $env:nodejs_version $env:platform
-  # Upgrade npm
-  # - npm install -g npm
   - npm install -g npm@%npm_version%
   - set PATH=%APPDATA%\npm;%PATH%
   - npm i nan@%nan_version%
@@ -42,13 +40,18 @@ build_script:
 test: off
 artifacts:
   - path: .\build\stage
-on_success:
-  - ps: |
-        if ($env:NODE_PRE_GYP_GITHUB_TOKEN)
-        {
-            git config --global credential.helper store
-            Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
-            git config --global user.email "matthias.dieudonne@gmail.com"
-            git config --global user.name "MatthD"
-            node-pre-gyp-github publish --release
-        }
+for:
+  -
+    branches:
+      only:
+        - master
+    on_success:
+      - ps: |
+            if ($env:NODE_PRE_GYP_GITHUB_TOKEN)
+            {
+                git config --global credential.helper store
+                Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
+                git config --global user.email "matthias.dieudonne@gmail.com"
+                git config --global user.name "MatthD"
+                node-pre-gyp-github publish --release
+            }
