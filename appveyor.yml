@@ -65,7 +65,7 @@ for:
                     Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
                     git config --global user.email "matthias.dieudonne@gmail.com"
                     git config --global user.name "MatthD"
-                    node-pre-gyp-github publish --release
+                    node-pre-gyp-github publish
                     if ($env:publish_to_npm){
                         npm publish
                     }
