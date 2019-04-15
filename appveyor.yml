@@ -26,6 +26,7 @@ environment:
       nan_version: 2.7.0
       pre_gyp_version: 0.6.39
       pre_gyp_github_version: 1.3.0
+      publish_to_npm: true
 
 cache:
   - '%APPDATA%\npm-cache'
@@ -36,6 +37,8 @@ install:
   - npm i nan@%nan_version%
   - npm install -g node-pre-gyp@%pre_gyp_version%
   - npm install -g node-pre-gyp-github@%pre_gyp_github_version%
+  - ps:  >- 
+        "//registry.npmjs.org/:_authToken=$env:npm_auth_token`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII
 
 build_script:
   - node-pre-gyp configure
@@ -63,6 +66,9 @@ for:
                     git config --global user.email "matthias.dieudonne@gmail.com"
                     git config --global user.name "MatthD"
                     node-pre-gyp-github publish --release
+                    if ($env:publish_to_npm){
+                        npm publish
+                    }
                 }else
                 {
                     Write-Host "NODE_PRE_GYP_GITHUB_TOKEN missing. Not authorised to perform release."
