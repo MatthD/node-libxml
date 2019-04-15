@@ -50,14 +50,19 @@ for:
             $releases = "https://api.github.com/repos/jupitex/node-libxml/releases"
             $lastRelease = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
             $curretVersion = (Get-Content package.json) -join "`n" | ConvertFrom-Json | Select -ExpandProperty "version"
-            if ($env:NODE_PRE_GYP_GITHUB_TOKEN -and (-not ($lastRelease -eq $curretVersion)))
+            if (-not ($lastRelease -eq $curretVersion))
             {
-                Write-Host "Releasing $curretVersion version"
-                git config --global credential.helper store
-                Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
-                git config --global user.email "matthias.dieudonne@gmail.com"
-                git config --global user.name "MatthD"
-                node-pre-gyp-github publish --release
+                if ($env:NODE_PRE_GYP_GITHUB_TOKEN){
+                    Write-Host "Releasing $curretVersion version"
+                    git config --global credential.helper store
+                    Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:NODE_PRE_GYP_GITHUB_TOKEN):x-oauth-basic@github.com`n"
+                    git config --global user.email "matthias.dieudonne@gmail.com"
+                    git config --global user.name "MatthD"
+                    node-pre-gyp-github publish --release
+                }else
+                {
+                    Write-Host "NODE_PRE_GYP_GITHUB_TOKEN missing. Not authorised to perform release."
+                }
             }else
             {
                 Write-Host "Version $curretVersion already released"
