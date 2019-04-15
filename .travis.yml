@@ -40,7 +40,7 @@ install:
 script:
 - |
   PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
-  RELEASE_VERSION=$(curl --silent "https://api.github.com/repos/jupitex/node-libxml/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+  RELEASE_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
   echo "Package version $PACKAGE_VERSION"
   echo "Released version $RELEASE_VERSION"
   if [ "$PACKAGE_VERSION" == "$RELEASE_VERSION" ]
