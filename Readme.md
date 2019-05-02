@@ -17,7 +17,7 @@ Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it
 
 Works on : Linux, Osx & Windows (no 32bits, just 64 bits) 
 
-Node: Already built for all LTS node (4,6,8)
+Node: Already built for all LTS node (4,6,8,10)
 
 ## Why use it 
 Node-libxml has been thought differently than [libxmljs](https://github.com/libxmljs/libxmljs); whereas libxmljs can be use in commun uses, you can use node-libxml if:
