@@ -22,17 +22,17 @@ before_install:
 - source ~/.nvm/nvm.sh
 - nvm install $NODE_VERSION
 - nvm use $NODE_VERSION
-# Upgrade npm
-# - npm install -g npm
 - npm install -g node-pre-gyp
-- npm install -g node-pre-gyp-github
-- git config --global credential.helper store
-- git config --global github.token $NODE_PRE_GYP_GITHUB_TOKEN
-- git config --global user.email "matthias.dieudonne@gmail.com"
-- git config --global user.name "MatthD"
+- | # Configure Github credentials if not a PR
+  if [[ $TRAVIS_PULL_REQUEST = "false" ]]; then
+    npm install -g node-pre-gyp-github
+    git config --global credential.helper store
+    git config --global github.token $NODE_PRE_GYP_GITHUB_TOKEN
+    git config --global user.email "matthias.dieudonne@gmail.com"
+    git config --global user.name "MatthD"
+  fi
 
 install:
-# - npm install --build-from-source
 - npm i nan
 - node-pre-gyp configure --enable-build-type=release
 - node-pre-gyp build
@@ -40,6 +40,7 @@ install:
 
 script:
 - |
+  [[ $TRAVIS_PULL_REQUEST = "true" ]] && exit 0
   PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
   RELEASE_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
   echo "Package version $PACKAGE_VERSION"
