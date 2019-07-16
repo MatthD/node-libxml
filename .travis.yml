@@ -1,11 +1,12 @@
 language: cpp
- 
+
 os:
 - linux
 - osx
- 
+
 env:
   matrix:
+    - NODE_VERSION="12.6"
     - NODE_VERSION="10.15"
     - NODE_VERSION="8.6"
     - NODE_VERSION="6.11"
@@ -13,7 +14,7 @@ env:
   include:
     - os: osx
       osx_image: xcode8.3
- 
+
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install fontconfig ; fi
@@ -23,7 +24,7 @@ before_install:
 - nvm use $NODE_VERSION
 # Upgrade npm
 # - npm install -g npm
-- npm install -g node-pre-gyp 
+- npm install -g node-pre-gyp
 - npm install -g node-pre-gyp-github
 - git config --global credential.helper store
 - git config --global github.token $NODE_PRE_GYP_GITHUB_TOKEN
@@ -49,6 +50,6 @@ script:
   else
     node-pre-gyp-github publish
   fi
- 
+
 notifications:
   email: false
