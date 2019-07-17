@@ -12,6 +12,12 @@
 using namespace std;
 using namespace v8;
 
+const char* ToChars(Local<Value> val) {
+  Local<String> str = val->ToString(Nan::GetCurrentContext()).FromMaybe(Local<String>());
+  string std_str = *Nan::Utf8String(str);
+  return std_str.c_str();
+}
+
 void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
   return;
 };
@@ -19,7 +25,7 @@ void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
 Libxml::Libxml() {
   //Maybe deport debug activation here ? in the future ..
 }
-//Destructor 
+//Destructor
 Libxml::~Libxml() {
   // Free memory dtd & xml file ..
   // If dtd is already null, just do nothing
@@ -54,9 +60,10 @@ NAN_MODULE_INIT(Libxml::Init) {
   Nan::SetPrototypeMethod(tpl, "freeSchemas", freeSchemas);
   Nan::SetPrototypeMethod(tpl, "clearAll", clearAll);
 
-  Local<ObjectTemplate> instTpl = tpl->InstanceTemplate();
   constructor().Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  Nan::Set(target, Nan::New("Libxml").ToLocalChecked(), tpl->GetFunction());
+  Nan::Set(target,
+    Nan::New("Libxml").ToLocalChecked(),
+    Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(Libxml::New) {
@@ -83,8 +90,8 @@ NAN_METHOD(Libxml::loadXml) {
   xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
             XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value val(info[0]->ToString());
-  const char* filename(*val);
+
+  const char* filename = ToChars(info[0]);
   // Those options shoudl be send by the user, it enable/disbale errors, warnings ..
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
@@ -113,7 +120,7 @@ NAN_METHOD(Libxml::loadXmlFromString) {
   xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
             XmlSyntaxError::PushToArray);
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value str(info[0]->ToString());
+  String::Utf8Value str(Isolate::GetCurrent(), info[0]);
   string txt (*str);
   // Those options shoudl be send by the user, it enable/disbale errors, warnings ..
   int options;
@@ -184,8 +191,8 @@ NAN_METHOD(Libxml::loadDtds){
             XmlSyntaxError::PushToArray);
   for (unsigned int i = 0; i < dtdsPathsLocal->Length(); i++){
     if (Nan::Has(dtdsPathsLocal, i).FromJust() && Nan::Get(dtdsPathsLocal, i).ToLocalChecked()->IsString()) {
-      Local<String> value = Nan::Get(dtdsPathsLocal, i).ToLocalChecked()->ToString();
-      String::Utf8Value pathV8(value->ToString());
+      Local<Value> value = Nan::Get(dtdsPathsLocal, i).ToLocalChecked();
+      String::Utf8Value pathV8(Isolate::GetCurrent(), value);
       string pathStr (*pathV8);
       const char* path (*pathV8);
       xmlChar* pathDTDCasted = xmlCharStrdup(path);
@@ -275,10 +282,10 @@ NAN_METHOD(Libxml::loadSchemas){
             XmlSyntaxError::PushToArray);
   for (unsigned int i = 0; i < schemasPathsLocal->Length(); i++){
     if (Nan::Has(schemasPathsLocal, i).FromJust() && Nan::Get(schemasPathsLocal, i).ToLocalChecked()->IsString()) {
-      Local<String> value = Nan::Get(schemasPathsLocal, i).ToLocalChecked()->ToString();
-      String::Utf8Value pathV8(value->ToString());
-      string pathStr (*pathV8);
-      const char* path (*pathV8);
+      Local<Value> val = Nan::Get(schemasPathsLocal, i).ToLocalChecked();
+      Local<String> str = val->ToString(Nan::GetCurrentContext()).FromMaybe(Local<String>());
+      string pathStr = *Nan::Utf8String(str);
+      const char* path = pathStr.c_str();
       xmlSchemaParserCtxtPtr pctxt;
       xmlSchemaPtr schema;
       // If cannot create Parse schema, just continue
@@ -311,11 +318,12 @@ NAN_METHOD(Libxml::validateAgainstDtds){
     return;
   }
 
-  if(int newMaxNbError = info[0]->IntegerValue()){
+  int param = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+
+  if(int newMaxNbError = param){
     XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
   }
 
-  //Setting contexte of validation 
   const char* dtdValidationErrorsPath;
   bool oneOfTheDtdValidate = false;
   string dtdValidateName;
@@ -375,10 +383,12 @@ NAN_METHOD(Libxml::validateAgainstSchemas){
     return;
   }
 
-  if(int newMaxNbError = info[0]->IntegerValue()){
+  int param = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+
+  if(int newMaxNbError = param){
     XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
   }
-  //Setting contexte of validation 
+  //Setting contexte of validation
   const char* schemaValidationErrorsPath;
   bool oneOfTheSchemaValidate = false;
   string schemaValidateName;
@@ -433,8 +443,7 @@ NAN_METHOD(Libxml::xpathSelect){
   Nan::EscapableHandleScope scope;
   v8::Local<v8::Value> res;
   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value val(info[0]->ToString());
-  const char* xpathToGet(*val);
+  const char* xpathToGet = ToChars(info[0]);
   xmlChar * xpathExpr = xmlCharStrdup(xpathToGet);
   xmlXPathContextPtr xpathCtx;
   xmlXPathObjectPtr xpathObj;

@@ -5,26 +5,27 @@
 #include <iostream>
 #include "libxml-syntax-error.h"
 
-void setStringField(v8::Local<v8::Object> obj, const char* name, const char* value) {
+using namespace v8;
+
+void setStringField(Local<Object> obj, const char* name, const char* value) {
   Nan::HandleScope scope;
   if (!value) {
     return;
   }
-  Nan::Set(obj, Nan::New<v8::String>(name).ToLocalChecked(), Nan::New<v8::String>(value, strlen(value)).ToLocalChecked());
+  Nan::Set(obj, Nan::New<String>(name).ToLocalChecked(), Nan::New<String>(value, strlen(value)).ToLocalChecked());
 }
 
-void setNumericField(v8::Local<v8::Object> obj, const char* name, const int value) {
+void setNumericField(Local<Object> obj, const char* name, const int value) {
   Nan::HandleScope scope;
-  Nan::Set(obj, Nan::New<v8::String>(name).ToLocalChecked(), Nan::New<v8::Int32>(value));
+  Nan::Set(obj, Nan::New<String>(name).ToLocalChecked(), Nan::New<Int32>(value));
 }
 
-v8::Local<v8::Value>
-XmlSyntaxError::BuildSyntaxError(xmlError* error) {
+Local<Value> XmlSyntaxError::BuildSyntaxError(xmlError* error) {
   Nan::EscapableHandleScope scope;
 
-  v8::Local<v8::Value> err = v8::Exception::Error(
-    Nan::New<v8::String>(error->message).ToLocalChecked());
-  v8::Local<v8::Object> out = v8::Local<v8::Object>::Cast(err);
+  Local<Value> err = Exception::Error(
+    Nan::New<String>(error->message).ToLocalChecked());
+  Local<Object> out = Local<Object>::Cast(err);
 
   setStringField(out, "message", error->message);
   setNumericField(out, "level", error->level);
@@ -38,20 +39,22 @@ XmlSyntaxError::BuildSyntaxError(xmlError* error) {
   return scope.Escape(err);
 }
 
-int XmlSyntaxError::maxError {100};
+uint XmlSyntaxError::maxError {100};
 
-void XmlSyntaxError::ChangeMaxNumberOfError(int max){
+void XmlSyntaxError::ChangeMaxNumberOfError(uint max){
   XmlSyntaxError::maxError = max;
 }
 
 void
 XmlSyntaxError::PushToArray(void* errs, xmlError* error) {
   Nan::HandleScope scope;
-  v8::Local<v8::Array> errors = *reinterpret_cast<v8::Local<v8::Array>*>(errs);
-  if(errors->Length() >= maxError){
+  Local<Array> errors = *reinterpret_cast<Local<Array>*>(errs);
+	uint len = errors->Length();
+  if(len >= maxError){
     return;
   }
-  v8::Local<v8::Function> push = v8::Local<v8::Function>::Cast(errors->Get(Nan::New<v8::String>("push").ToLocalChecked()));
-  v8::Local<v8::Value> argv[1] = { XmlSyntaxError::BuildSyntaxError(error) };
-  push->Call(errors, 1, argv);
+  // Local<Function> push = Local<Function>::Cast(errors->Get(Nan::New<String>("push").ToLocalChecked()));
+  // Local<Value> argv[1] = { XmlSyntaxError::BuildSyntaxError(error) };
+  // push->Call(errors, 1, argv);
+	errors->Set(len, XmlSyntaxError::BuildSyntaxError(error));
 }

@@ -6,9 +6,9 @@
 #include "libxml.h"
 
 class XmlSyntaxError {
-  static int maxError;
+  static uint maxError;
 public:
-  static void ChangeMaxNumberOfError(int max);
+  static void ChangeMaxNumberOfError(uint max);
 
   // push xmlError onto v8::Array
   static void PushToArray(void* errs, xmlError* error);
@@ -18,4 +18,4 @@ public:
 };
 
 // LIBXML_SYNTAX_ERROR
-#endif  
+#endif

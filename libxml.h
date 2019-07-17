@@ -34,8 +34,9 @@ public:
   vector<xmlSchemaPtr> schemasPaths;
 
 private:
+  static const char* ToChars(v8::Local<v8::Value> val);
   static void errorsHandler(void *, xmlErrorPtr);
-  explicit Libxml(); 
+  explicit Libxml();
   static inline Nan::Persistent<v8::Function>& constructor();
 
   static NAN_METHOD(New);
@@ -52,7 +53,7 @@ private:
   static NAN_METHOD(freeDtds);
   static NAN_METHOD(freeSchemas);
   static NAN_METHOD(clearAll);
-  
+
 };
 
 #endif
