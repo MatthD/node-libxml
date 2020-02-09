@@ -2,19 +2,34 @@
   'targets': [
     {
       'target_name': 'xml',
+      'cflags!': [ '-fno-exceptions' ],
+      'cflags_cc!': [ '-fno-exceptions' ],
+      'xcode_settings': { 'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+        'CLANG_CXX_LIBRARY': 'libc++',
+        'MACOSX_DEPLOYMENT_TARGET': '10.7',
+      },
+      'msvs_settings': {
+        'VCCLCompilerTool': { 'ExceptionHandling': 1 },
+      },
       'product_extension': 'node',
       'type': 'shared_library',
       'include_dirs': [
+        '<!@(node -p "require(\'node-addon-api\').include")',
         'vendor/libxml/include',
-        "<!(node -e \"require('nan')\")"
+        "<!@(node -p \"require('node-addon-api').include\")",
       ],
       'cflags': [ '-Wall' ],
+      'cflags!': [ '-fno-exceptions' ],
+      'cflags_cc!': [ '-fno-exceptions' ],
       'xcode_settings': {
+        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+        'CLANG_CXX_LIBRARY': 'libc++',
+        'MACOSX_DEPLOYMENT_TARGET': '10.7',
         'OTHER_CFLAGS': [ '-Wall' ]
       },
       'sources': [
         'libxml.cpp',
-        'libxml-syntax-error.cpp',
+        # 'libxml-syntax-error.cpp',
         'vendor/libxml/buf.c',
         'vendor/libxml/catalog.c',
         'vendor/libxml/chvalid.c',
@@ -56,7 +71,9 @@
       ],
       'conditions': [
         ['OS=="mac"', {
+          'cflags+': ['-fvisibility=hidden'],
           'xcode_settings': {
+            'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
             'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
             'OTHER_LDFLAGS': [
               '-undefined dynamic_lookup'

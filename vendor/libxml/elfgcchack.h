@@ -28,7 +28,7 @@
 #include "libxml/HTMLtree.h"
 #include "libxml/list.h"
 #include "libxml/nanoftp.h"
-#include "libxml/nanohttp.h"
+#include "libxml/napi.http.h"
 #include "libxml/parser.h"
 #include "libxml/parserInternals.h"
 #include "libxml/pattern.h"
@@ -5778,7 +5778,7 @@ extern __typeof (xmlNanoFTPUpdateURL) xmlNanoFTPUpdateURL__internal_alias __attr
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPAuthHeader
 extern __typeof (xmlNanoHTTPAuthHeader) xmlNanoHTTPAuthHeader __attribute((alias("xmlNanoHTTPAuthHeader__internal_alias")));
 #else
@@ -5790,7 +5790,7 @@ extern __typeof (xmlNanoHTTPAuthHeader) xmlNanoHTTPAuthHeader__internal_alias __
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPCleanup
 extern __typeof (xmlNanoHTTPCleanup) xmlNanoHTTPCleanup __attribute((alias("xmlNanoHTTPCleanup__internal_alias")));
 #else
@@ -5802,7 +5802,7 @@ extern __typeof (xmlNanoHTTPCleanup) xmlNanoHTTPCleanup__internal_alias __attrib
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPClose
 extern __typeof (xmlNanoHTTPClose) xmlNanoHTTPClose __attribute((alias("xmlNanoHTTPClose__internal_alias")));
 #else
@@ -5814,7 +5814,7 @@ extern __typeof (xmlNanoHTTPClose) xmlNanoHTTPClose__internal_alias __attribute(
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPContentLength
 extern __typeof (xmlNanoHTTPContentLength) xmlNanoHTTPContentLength __attribute((alias("xmlNanoHTTPContentLength__internal_alias")));
 #else
@@ -5826,7 +5826,7 @@ extern __typeof (xmlNanoHTTPContentLength) xmlNanoHTTPContentLength__internal_al
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPEncoding
 extern __typeof (xmlNanoHTTPEncoding) xmlNanoHTTPEncoding __attribute((alias("xmlNanoHTTPEncoding__internal_alias")));
 #else
@@ -5838,7 +5838,7 @@ extern __typeof (xmlNanoHTTPEncoding) xmlNanoHTTPEncoding__internal_alias __attr
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPFetch
 extern __typeof (xmlNanoHTTPFetch) xmlNanoHTTPFetch __attribute((alias("xmlNanoHTTPFetch__internal_alias")));
 #else
@@ -5850,7 +5850,7 @@ extern __typeof (xmlNanoHTTPFetch) xmlNanoHTTPFetch__internal_alias __attribute(
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPInit
 extern __typeof (xmlNanoHTTPInit) xmlNanoHTTPInit __attribute((alias("xmlNanoHTTPInit__internal_alias")));
 #else
@@ -5862,7 +5862,7 @@ extern __typeof (xmlNanoHTTPInit) xmlNanoHTTPInit__internal_alias __attribute((v
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPMethod
 extern __typeof (xmlNanoHTTPMethod) xmlNanoHTTPMethod __attribute((alias("xmlNanoHTTPMethod__internal_alias")));
 #else
@@ -5874,7 +5874,7 @@ extern __typeof (xmlNanoHTTPMethod) xmlNanoHTTPMethod__internal_alias __attribut
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPMethodRedir
 extern __typeof (xmlNanoHTTPMethodRedir) xmlNanoHTTPMethodRedir __attribute((alias("xmlNanoHTTPMethodRedir__internal_alias")));
 #else
@@ -5886,7 +5886,7 @@ extern __typeof (xmlNanoHTTPMethodRedir) xmlNanoHTTPMethodRedir__internal_alias 
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPMimeType
 extern __typeof (xmlNanoHTTPMimeType) xmlNanoHTTPMimeType __attribute((alias("xmlNanoHTTPMimeType__internal_alias")));
 #else
@@ -5898,7 +5898,7 @@ extern __typeof (xmlNanoHTTPMimeType) xmlNanoHTTPMimeType__internal_alias __attr
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPOpen
 extern __typeof (xmlNanoHTTPOpen) xmlNanoHTTPOpen __attribute((alias("xmlNanoHTTPOpen__internal_alias")));
 #else
@@ -5910,7 +5910,7 @@ extern __typeof (xmlNanoHTTPOpen) xmlNanoHTTPOpen__internal_alias __attribute((v
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPOpenRedir
 extern __typeof (xmlNanoHTTPOpenRedir) xmlNanoHTTPOpenRedir __attribute((alias("xmlNanoHTTPOpenRedir__internal_alias")));
 #else
@@ -5922,7 +5922,7 @@ extern __typeof (xmlNanoHTTPOpenRedir) xmlNanoHTTPOpenRedir__internal_alias __at
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPRead
 extern __typeof (xmlNanoHTTPRead) xmlNanoHTTPRead __attribute((alias("xmlNanoHTTPRead__internal_alias")));
 #else
@@ -5934,7 +5934,7 @@ extern __typeof (xmlNanoHTTPRead) xmlNanoHTTPRead__internal_alias __attribute((v
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPRedir
 extern __typeof (xmlNanoHTTPRedir) xmlNanoHTTPRedir __attribute((alias("xmlNanoHTTPRedir__internal_alias")));
 #else
@@ -5946,7 +5946,7 @@ extern __typeof (xmlNanoHTTPRedir) xmlNanoHTTPRedir__internal_alias __attribute(
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPReturnCode
 extern __typeof (xmlNanoHTTPReturnCode) xmlNanoHTTPReturnCode __attribute((alias("xmlNanoHTTPReturnCode__internal_alias")));
 #else
@@ -5958,7 +5958,7 @@ extern __typeof (xmlNanoHTTPReturnCode) xmlNanoHTTPReturnCode__internal_alias __
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED) && defined(LIBXML_OUTPUT_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPSave
 extern __typeof (xmlNanoHTTPSave) xmlNanoHTTPSave __attribute((alias("xmlNanoHTTPSave__internal_alias")));
 #else
@@ -5970,7 +5970,7 @@ extern __typeof (xmlNanoHTTPSave) xmlNanoHTTPSave__internal_alias __attribute((v
 #endif
 
 #if defined(LIBXML_HTTP_ENABLED)
-#ifdef bottom_nanohttp
+#ifdef bottom_napi.http
 #undef xmlNanoHTTPScanProxy
 extern __typeof (xmlNanoHTTPScanProxy) xmlNanoHTTPScanProxy __attribute((alias("xmlNanoHTTPScanProxy__internal_alias")));
 #else

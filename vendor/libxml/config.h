@@ -129,7 +129,7 @@
 #  undef /**/ HAVE_MMAP
 #endif
 
-/* Define to 1 if you have the <nan.h> header file. */
+/* Define to 1 if you have the <napi.h> header file. */
 /* #undef HAVE_NAN_H */
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */

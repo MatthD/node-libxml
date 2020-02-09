@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(lldb) Lancer",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/Users/dieudonn/.nvm/versions/node/v12.13.0/bin/node",
+      "args": [
+        "/Users/dieudonn/Dev/node-libxml/test/libxml-test.js"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Launch Program",
+      "preLaunchTask": "npm: build:dev",
+      "program": "/Users/dieudonn/.nvm/versions/node/v12.13.0/bin/node",
+      "args": [
+        "/Users/dieudonn/Dev/node-libxml/test/index.js"
+      ]
+    }
+  ]
+}

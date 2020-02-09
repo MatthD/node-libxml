@@ -1,7 +1,7 @@
 #ifndef LIBXML_H
 #define LIBXML_H
 
-#include <nan.h>
+#include "napi.h"
 #include <string>
 #include <vector>
 
@@ -15,7 +15,8 @@
 
 #include "libxml-syntax-error.h"
 
-enum {
+enum
+{
   ERROR_OCCURED = -1, // Une erreur est survenue pendant la validation
   NOT_VALID = 0,      // Le document n'est pas valide
   VALID = 1           // Le document est valide
@@ -23,36 +24,33 @@ enum {
 
 using namespace std;
 
-class Libxml : public Nan::ObjectWrap {
+class Libxml : public Napi::ObjectWrap<Libxml>
+{
 public:
-
-  ~Libxml();
-
-  static NAN_MODULE_INIT(Init);
-  xmlDocPtr docPtr = NULL;
-  vector<xmlDtdPtr> dtdsPaths;
-  vector<xmlSchemaPtr> schemasPaths;
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  Libxml(const Napi::CallbackInfo &info);
 
 private:
-  static void errorsHandler(void *, xmlErrorPtr);
-  explicit Libxml(); 
-  static inline Nan::Persistent<v8::Function>& constructor();
-
-  static NAN_METHOD(New);
-  static NAN_METHOD(loadXml);
-  static NAN_METHOD(loadXmlFromString);
-  static NAN_METHOD(loadDtds);
-  // static NAN_METHOD(loadDtdsFromString);
-  static NAN_METHOD(loadSchemas);
-  static NAN_METHOD(validateAgainstDtds);
-  static NAN_METHOD(validateAgainstSchemas);
-  static NAN_METHOD(xpathSelect);
-  static NAN_METHOD(getDtd);
-  static NAN_METHOD(freeXml);
-  static NAN_METHOD(freeDtds);
-  static NAN_METHOD(freeSchemas);
-  static NAN_METHOD(clearAll);
-  
+  // static void errorsHandler(void *, xmlErrorPtr);
+  // explicit Libxml();
+  xmlDocPtr docPtr = NULL;
+  string path;
+  vector<xmlDtdPtr> dtdsPaths;
+  vector<xmlSchemaPtr> schemasPaths;
+  static Napi::FunctionReference constructor;
+  Napi::Value loadXml(const Napi::CallbackInfo &info);
+  // static Napi::Value loadXmlFromString(const Napi::CallbackInfo& info);
+  // static Napi::Value loadDtds(const Napi::CallbackInfo& info);
+  // // static Napi::Value loadDtdsFromString(const Napi::CallbackInfo& info);
+  // static Napi::Value loadSchemas(const Napi::CallbackInfo& info);
+  // static Napi::Value validateAgainstDtds(const Napi::CallbackInfo& info);
+  // static Napi::Value validateAgainstSchemas(const Napi::CallbackInfo& info);
+  // static Napi::Value xpathSelect(const Napi::CallbackInfo& info);
+  // static Napi::Value getDtd(const Napi::CallbackInfo& info);
+  // static Napi::Value freeXml(const Napi::CallbackInfo& info);
+  // static Napi::Value freeDtds(const Napi::CallbackInfo& info);
+  // static Napi::Value freeSchemas(const Napi::CallbackInfo& info);
+  // static Napi::Value clearAll(const Napi::CallbackInfo& info);
 };
 
 #endif
