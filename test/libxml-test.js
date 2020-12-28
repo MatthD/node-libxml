@@ -51,13 +51,14 @@ describe('Node-Libxml', function () {
     expect(libxml).not.to.have.property("wellformedErrors");
     libxml.freeXml();
   });
-  // it('should return wellformed on a wellformed XMl in utf8-bom & other encoding FROM STRING', function () {
-  //   let libxml = new Libxml();
-  //   let defaultNotUtf8 = fs.readFileSync('test/data/test-default-not-utf8.xml','utf8');
-  //   let testNotUtf8 = libxml.loadXmlFromString(defaultNotUtf8);
-  //   expect(testNotUtf8).to.be.true;
-  //   libxml.freeXml();
-  // });
+  it('should return wellformed on a wellformed XMl in utf8-bom & other encoding FROM STRING', function () {
+    let libxml = new Libxml();
+    let defaultNotUtf8 = fs.readFileSync('test/data/test-default-not-utf8.xml','utf8');
+    let testNotUtf8 = libxml.loadXmlFromString(defaultNotUtf8);
+    expect(testNotUtf8).to.be.true;
+    expect(libxml).not.have.property("wellFormedErrors");
+    libxml.freeXml();
+  });
   // // Wellformed & invalid
   // it('Should return wellformed & invalid on a wellformed BUT invalid xml', function () {
   //   let libxml = new Libxml();
