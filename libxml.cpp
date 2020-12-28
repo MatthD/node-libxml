@@ -13,6 +13,7 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
   // This method is used to hook the accessor and method callbacks
   Napi::Function func = DefineClass(env, "Libxml", {
     InstanceMethod("loadXml", &Libxml::loadXml),
+    InstanceMethod("getDtd", &Libxml::getDtd),
     InstanceMethod("freeXml", &Libxml::freeXml)
     });
 
@@ -78,6 +79,37 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
     this->Value().Delete("wellformedErrors");
   }
   return Napi::Boolean::New(env, true);
+}
+Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  // Get DTD using libxml2
+  xmlDtdPtr dtd = xmlGetIntSubset(this->docPtr);
+  //return null if no valid xml loaded so far
+  if (!dtd) {
+    return env.Null();
+  }
+
+  //Set up return object.
+  const char* name = (const char *)dtd->name;
+  const char* extId = (const char *)dtd->ExternalID;
+  const char* sysId = (const char *)dtd->SystemID;
+  Napi::Object dtdObject = Napi::Object::New(env);
+  Napi::Value nameValue = name
+                            ? Napi::String::New(env, name)
+                            : env.Null();
+  Napi::Value extValue = extId
+                            ? Napi::String::New(env, extId)
+                            : env.Null();
+  Napi::Value sysValue = sysId
+                            ? Napi::String::New(env, sysId)
+                            : env.Null();
+
+  // to get publicId or systemId it's the same ... http://xmlsoft.org/html/libxml-tree.html#xmlDtd
+  dtdObject.Set("name", nameValue);
+  dtdObject.Set("externalId", extValue);
+  dtdObject.Set("systemId", sysValue);
+  return dtdObject;
 }
 
 void Libxml::freeXml(const Napi::CallbackInfo& info) {

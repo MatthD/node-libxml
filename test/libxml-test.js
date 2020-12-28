@@ -99,16 +99,17 @@ describe('Node-Libxml', function () {
     libxml.freeXml();
     expect(libxml).not.to.have.property('wellformedErrors');
   });
-  // it('Should return an object contaning DTD', function () {
-  //   let libxml = new Libxml();
-  //   let xmlfile = libxml.loadXml('test/data/test-default.xml');
-  //   let currentDtd = libxml.getDtd();
-  //   expect(currentDtd).to.be.an('object');
-  //   expect(currentDtd).to.have.property('name', 'article');
-  //   expect(currentDtd).to.have.property('externalId', 'my doctype of doom');
-  //   expect(currentDtd).to.have.property('systemId', 'mydoctype.dtd');
-  //   libxml.freeXml();
-  // });
+  it('Should return an object containing DTD', function () {
+    let libxml = new Libxml();
+    let loaded = libxml.loadXml('test/data/test-default.xml');
+    expect(loaded).to.be.true;
+    let currentDtd = libxml.getDtd();
+    expect(currentDtd).to.be.an('object');
+    expect(currentDtd).to.have.property('name', 'article');
+    expect(currentDtd).to.have.property('externalId', 'my doctype of doom');
+    expect(currentDtd).to.have.property('systemId', 'mydoctype.dtd');
+    libxml.freeXml();
+  });
   // it('Shoud return correct xpath values', function () {
   //   let libxml = new Libxml(),
   //   xmlfile = libxml.loadXml('test/data/test-default.xml'),
