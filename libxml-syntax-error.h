@@ -7,7 +7,7 @@
 
 class XmlSyntaxError
 {
-  static int maxError;
+  static uint32_t maxError;
 
 public:
   static Napi::Env* env;

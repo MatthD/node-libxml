@@ -43,7 +43,7 @@ XmlSyntaxError::BuildSyntaxError(xmlError *error, Napi::Env env)
   return out;
 }
 
-int XmlSyntaxError::maxError{100};
+uint32_t XmlSyntaxError::maxError{100};
 Napi::Env* XmlSyntaxError::env = nullptr;
 
 void XmlSyntaxError::ChangeMaxNumberOfError(int max)
