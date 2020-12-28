@@ -1,5 +1,5 @@
 /**
-* This is the Errros Class script, for wellformed & validation DTD
+* This is the Errors Class script, for wellformed & validation DTD
 */
 #include <cstring>
 #include <iostream>
@@ -12,13 +12,13 @@ void setStringField(Napi::Object obj, const char *name, const char *value, Napi:
   {
     return;
   }
-  (obj).Set(Napi::String::New(env, name), Napi::String::New(env, value, strlen(value)));
+  obj.Set(name, Napi::String::New(env, value));
 }
 
 void setNumericField(Napi::Object obj, const char *name, const int value, Napi::Env env)
 {
   Napi::HandleScope scope(env);
-  (obj).Set(Napi::String::New(env, name), Napi::Number::New(env, value));
+  obj.Set(name, Napi::Number::New(env, value));
 }
 
 Napi::Value
@@ -53,10 +53,10 @@ void XmlSyntaxError::ChangeMaxNumberOfError(int max)
 void XmlSyntaxError::PushToArray(void *errs, xmlError *error)
 {
   Napi::Array errors = *reinterpret_cast<Napi::Array *>(errs);
-  if (errors.Length >= maxError)
+  if (errors.Length() >= maxError)
   {
     return;
   }
   Napi::Value castedError = {XmlSyntaxError::BuildSyntaxError(error, XmlSyntaxError::env)};
-  errors.Set(errors.Length, castedError);
+  errors.Set(errors.Length(), castedError);
 }
