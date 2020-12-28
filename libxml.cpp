@@ -48,7 +48,7 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   xmlError *tmpError;
   Napi::Array errors = Napi::Array::New(env);
   xmlResetLastError();
-  XmlSyntaxError::env = env;
+  XmlSyntaxError::env = &env;
   xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
                             XmlSyntaxError::PushToArray);
   if (this->docPtr != NULL)
@@ -70,7 +70,7 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   if (this->docPtr == NULL)
   {
     // return Napi::Array(errors);
-    this->InstanceValue("wellformedErrors", errors);
+    this->Value().Set("wellformedErrors", errors);
     return Napi::Boolean::New(env, false);
   } else {
     this->Value().Delete("wellformedErrors");

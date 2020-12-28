@@ -28,7 +28,7 @@ XmlSyntaxError::BuildSyntaxError(xmlError *error, Napi::Env env)
 
   auto err = Napi::TypeError::New(env,
                                   Napi::String::New(env, error->message));
-  Napi::Object out = Napi::Object();
+  Napi::Object out = Napi::Object::New(env);
 
   setStringField(out, "message", error->message, env);
   setNumericField(out, "level", error->level, env);
@@ -44,6 +44,7 @@ XmlSyntaxError::BuildSyntaxError(xmlError *error, Napi::Env env)
 }
 
 int XmlSyntaxError::maxError{100};
+Napi::Env* XmlSyntaxError::env = nullptr;
 
 void XmlSyntaxError::ChangeMaxNumberOfError(int max)
 {
@@ -57,6 +58,6 @@ void XmlSyntaxError::PushToArray(void *errs, xmlError *error)
   {
     return;
   }
-  Napi::Value castedError = {XmlSyntaxError::BuildSyntaxError(error, XmlSyntaxError::env)};
+  Napi::Value castedError = {XmlSyntaxError::BuildSyntaxError(error, *XmlSyntaxError::env)};
   errors.Set(errors.Length(), castedError);
 }

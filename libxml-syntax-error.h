@@ -10,7 +10,7 @@ class XmlSyntaxError
   static int maxError;
 
 public:
-  static Napi::Env env;
+  static Napi::Env* env;
   static void ChangeMaxNumberOfError(int max);
 
   // push xmlError onto v8::Array
