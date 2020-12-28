@@ -47,10 +47,10 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   cout << "after libxml 1" << endl;
   xmlError *tmpError;
   Napi::Array errors = Napi::Array::New(env);
-  // xmlResetLastError();
-  // XmlSyntaxError::env = env;
-  // xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-  //                           XmlSyntaxError::PushToArray);
+  xmlResetLastError();
+  XmlSyntaxError::env = env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+                            XmlSyntaxError::PushToArray);
   if (this->docPtr != NULL)
   {
     cout << "after libxml 2" << endl;
@@ -70,7 +70,10 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   if (this->docPtr == NULL)
   {
     // return Napi::Array(errors);
+    this->InstanceValue("wellformedErrors", errors);
     return Napi::Boolean::New(env, false);
+  } else {
+    this->Value().Delete("wellformedErrors");
   }
   return Napi::Boolean::New(env, true);
 }

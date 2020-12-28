@@ -47,7 +47,8 @@ describe('Node-Libxml', function () {
   it('should return wellformed on a wellformed XMl in utf8-bom & other encoding', function () {
     let libxml = new Libxml();
     let testNotUtf8 = libxml.loadXml('test/data/test-default-not-utf8.xml');
-    expect(testNotUtf8).to.be.true
+    expect(testNotUtf8).to.be.true;
+    expect(libxml).not.to.have.property("wellformedErrors")
   });
   // it('should return wellformed on a wellformed XMl in utf8-bom & other encoding FROM STRING', function () {
   //   let libxml = new Libxml();
