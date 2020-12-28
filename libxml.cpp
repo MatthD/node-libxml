@@ -1,5 +1,5 @@
 /**
-* This is the main Class script, We use NODE-ADDOND-API (N-API) as a wrapper to libxml2 c+++ functions
+* This is the main Class script, We use NODE-ADDON-API (N-API) as a wrapper to libxml2 c++ functions
 */
 #include "libxml.h"
 #include <algorithm>
@@ -11,7 +11,10 @@
 Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
 {
   // This method is used to hook the accessor and method callbacks
-  Napi::Function func = DefineClass(env, "Libxml", {InstanceMethod("loadXml", &Libxml::loadXml)});
+  Napi::Function func = DefineClass(env, "Libxml", {
+    InstanceMethod("loadXml", &Libxml::loadXml),
+    InstanceMethod("freeXml", &Libxml::freeXml)
+    });
 
   // Create a peristent reference to the class constructor. This will allow
   // a function called on a class prototype and a function
@@ -45,11 +48,10 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
   cout << "after libxml 1" << endl;
-  xmlError *tmpError;
   Napi::Array errors = Napi::Array::New(env);
   xmlResetLastError();
   XmlSyntaxError::env = &env;
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
                             XmlSyntaxError::PushToArray);
   if (this->docPtr != NULL)
   {
@@ -76,6 +78,19 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
     this->Value().Delete("wellformedErrors");
   }
   return Napi::Boolean::New(env, true);
+}
+
+void Libxml::freeXml(const Napi::CallbackInfo& info) {
+  Napi::HandleScope scope(info.Env());
+  // Delete Javascript property
+  this->Value().Delete("wellformedErrors");
+  // If doc is already null, just do nothing and only available on manual mod
+  if(this->docPtr == nullptr){
+    return;
+  }
+  // Force clear the memory loaded for XML
+  xmlFreeDoc(this->docPtr);
+  this->docPtr = nullptr;
 }
 
 // Initialize native add-on

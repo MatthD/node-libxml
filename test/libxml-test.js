@@ -48,7 +48,8 @@ describe('Node-Libxml', function () {
     let libxml = new Libxml();
     let testNotUtf8 = libxml.loadXml('test/data/test-default-not-utf8.xml');
     expect(testNotUtf8).to.be.true;
-    expect(libxml).not.to.have.property("wellformedErrors")
+    expect(libxml).not.to.have.property("wellformedErrors");
+    libxml.freeXml();
   });
   // it('should return wellformed on a wellformed XMl in utf8-bom & other encoding FROM STRING', function () {
   //   let libxml = new Libxml();
@@ -95,6 +96,8 @@ describe('Node-Libxml', function () {
     // expect(wellformedV).to.be.false;
     expect(libxml).to.have.property('wellformedErrors');
     expect(libxml.wellformedErrors).to.be.an('array');
+    libxml.freeXml();
+    expect(libxml).not.to.have.property('wellformedErrors');
   });
   // it('Should return an object contaning DTD', function () {
   //   let libxml = new Libxml();

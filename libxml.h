@@ -47,7 +47,7 @@ private:
   // static Napi::Value validateAgainstSchemas(const Napi::CallbackInfo& info);
   // static Napi::Value xpathSelect(const Napi::CallbackInfo& info);
   // static Napi::Value getDtd(const Napi::CallbackInfo& info);
-  // static Napi::Value freeXml(const Napi::CallbackInfo& info);
+  void freeXml(const Napi::CallbackInfo& info);
   // static Napi::Value freeDtds(const Napi::CallbackInfo& info);
   // static Napi::Value freeSchemas(const Napi::CallbackInfo& info);
   // static Napi::Value clearAll(const Napi::CallbackInfo& info);
