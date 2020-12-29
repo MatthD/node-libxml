@@ -15,11 +15,15 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
     InstanceMethod("loadXml", &Libxml::loadXml),
     InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
     InstanceMethod("loadDtds", &Libxml::loadDtds),
+    InstanceMethod("loadSchemas", &Libxml::loadSchemas),
     InstanceMethod("validateAgainstDtds", &Libxml::validateAgainstDtds),
+    InstanceMethod("validateAgainstSchemas", &Libxml::validateAgainstSchemas),
     InstanceMethod("xpathSelect", &Libxml::xpathSelect),
     InstanceMethod("getDtd", &Libxml::getDtd),
     InstanceMethod("freeXml", &Libxml::freeXml),
-    InstanceMethod("freeDtds", &Libxml::freeDtds)
+    InstanceMethod("freeDtds", &Libxml::freeDtds),
+    InstanceMethod("freeSchemas", &Libxml::freeSchemas),
+    InstanceMethod("clearAll", &Libxml::clearAll)
     });
 
   // Create a peristent reference to the class constructor. This will allow
@@ -163,6 +167,57 @@ Napi::Value Libxml::loadDtds(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
+Napi::Value Libxml::loadSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  if (info.Length() < 1){
+     Napi::TypeError::New(env, "loadSchemas requires at least 1 argument, an array of Schemas").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  if(!info[0].IsArray()){
+    Napi::TypeError::New(env, "loadSchemas requires an array").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  Napi::EscapableHandleScope scope(env);
+  Napi::Array schemasPathsLocal = info[0].As<Napi::Array>();
+  //set up error handlers
+  Napi::Array errors = Napi::Array::New(env);
+  xmlResetLastError();
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                          XmlSyntaxError::PushToArray);
+  for (unsigned int i = 0; i < schemasPathsLocal.Length(); i++){
+    // Handle value if string and drop it silently otherwise
+    if(schemasPathsLocal.Get(i).IsString()) {
+      Napi::String value = schemasPathsLocal.Get(i).As<Napi::String>();
+      string pathStr (value.Utf8Value());
+      const char* path (pathStr.c_str());
+      xmlSchemaParserCtxtPtr pctxt;
+      xmlSchemaPtr schema;
+      // If cannot create Parse schema, just continue
+      if ((pctxt = xmlSchemaNewParserCtxt(path)) == NULL) {
+        XmlSyntaxError::PushToArray(errors, path);
+        continue;
+      }
+      // Loading XML Schema content
+      schema = xmlSchemaParse(pctxt);
+      xmlSchemaFreeParserCtxt(pctxt);
+      if (schema == nullptr) {
+        XmlSyntaxError::PushToArray(errors, path);
+        continue;
+      }
+      this->schemasPaths.push_back(schema);
+    }
+  }
+  xmlSetStructuredErrorFunc(NULL, NULL);
+  // We set dtdLoadedErrors property for js side
+  if(errors.Length()){
+    this->Value().Set("schemasLoadedErrors", errors);
+  } else {
+    this->Value().Delete("schemasLoadedErrors");
+  }
+  return env.Undefined();
+}
+
 Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -230,6 +285,74 @@ Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
     }
   }else{
     this->Value().Set("validationDtdErrors", errorsValidations);
+    return Napi::Boolean::New(env, false);
+  }
+}
+
+Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if(this->schemasPaths.empty()){
+    return env.Null();;
+  }
+
+  if(info[0].IsNumber()){
+    XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber().Int32Value());
+  }
+  //Setting context of validation 
+  const char* schemaValidationErrorsPath;
+  bool oneOfTheSchemaValidate = false;
+  string schemaValidateName;
+
+
+  //If length 0, return null; to implement
+  //Local<Object> errorsValidations = Nan::New<Object>();
+  Napi::Object errorsValidations = Napi::Object::New(env);
+
+  for (vector<xmlSchemaPtr>::iterator xsd = this->schemasPaths.begin(); xsd != this->schemasPaths.end() ; ++xsd){
+    //set up error handling
+    Napi::Array errors = Napi::Array::New(env);
+    xmlResetLastError();
+    XmlSyntaxError::env = &env;
+    xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+
+    const char* xsdName = (const char *)(*xsd)->doc->URL;
+    //Local<String> urlSchema = Nan::New<String>(xsdName).ToLocalChecked();
+    Napi::String urlSchema = Napi::String::New(env, xsdName);
+    // Creating the validation context
+    xmlSchemaValidCtxtPtr vctxt;
+    if ((vctxt = xmlSchemaNewValidCtxt(*xsd)) == nullptr) {
+      continue;
+    }
+    //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
+    // xmlSchemaSetValidErrors(vctxt, (xmlSchemaValidityErrorFunc) Libxml::errorsHandler, (xmlSchemaValidityWarningFunc) Libxml::errorsHandler, (void *) Libxml::errorsHandler);
+    xmlSchemaSetValidErrors(vctxt, nullptr, nullptr, nullptr);
+    int result = xmlSchemaValidateDoc(vctxt, this->docPtr);
+    // Stop listening for errors
+    xmlSetStructuredErrorFunc(nullptr, nullptr);
+    xmlSchemaFreeValidCtxt(vctxt);
+    if(result == 0){
+      oneOfTheSchemaValidate = true;
+      schemaValidateName = xsdName;
+      break;
+    }
+    errorsValidations.Set(urlSchema, errors);
+    schemaValidationErrorsPath = xsdName;
+  }
+  if(oneOfTheSchemaValidate){
+    this->Value().Delete("validationSchemaErrors");
+    if(schemaValidateName.length()){
+      //info.GetReturnValue().Set(Nan::New<v8::String>(schemaValidateName).ToLocalChecked());
+      return Napi::String::New(env, schemaValidateName);
+    }else{
+      //info.GetReturnValue().Set(Nan::True());
+      return Napi::Boolean::New(env, true);
+    }
+  }else{
+    // info.Holder()->Set(Nan::New<v8::String>("validationSchemaErrors").ToLocalChecked(), errorsValidations);
+    // info.GetReturnValue().Set(Nan::False());
+    this->Value().Set("validationSchemaErrors", errorsValidations);
     return Napi::Boolean::New(env, false);
   }
 }
@@ -328,7 +451,7 @@ void Libxml::freeXml(const Napi::CallbackInfo& info) {
   this->docPtr = nullptr;
 }
 
-Napi::Value Libxml::freeDtds(const Napi::CallbackInfo& info) {
+void Libxml::freeDtds(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   Napi::HandleScope scope(env);
   // Delete Javascript property
@@ -336,7 +459,7 @@ Napi::Value Libxml::freeDtds(const Napi::CallbackInfo& info) {
   this->Value().Delete("validationDtdErrors");
   // If dtds is already empty, just stop here
   if(this->dtdsPaths.empty()){
-    return env.Undefined();
+    return;
   }
   for (vector<xmlDtdPtr>::iterator dtd = this->dtdsPaths.begin(); dtd != this->dtdsPaths.end() ; ++dtd){
     if(*dtd != nullptr){
@@ -347,7 +470,39 @@ Napi::Value Libxml::freeDtds(const Napi::CallbackInfo& info) {
   }
   // clear the vector of dtds
   this->dtdsPaths.clear();
-  return env.Undefined();
+  return;
+}
+
+void Libxml::freeSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  //Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  // Delete Javascript property
+  // bool deletedLoaded = Nan::Delete(info.Holder(), Nan::New<v8::String>("schemasLoadedErrors").ToLocalChecked()).FromMaybe(false);
+  // bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationSchemasErrors").ToLocalChecked()).FromMaybe(false);
+  this->Value().Delete("schemasLoadedErrors");
+  this->Value().Delete("validationSchemasErrors");
+  // If dtds is already empty, just stop here
+  if(this->schemasPaths.empty()){
+    return;
+  }
+  for (vector<xmlSchemaPtr>::iterator xsd = this->schemasPaths.begin(); xsd != this->schemasPaths.end() ; ++xsd){
+    if(*xsd != nullptr){
+      // Force clear memory xsd loaded
+      xmlSchemaFree(*xsd);
+      *xsd = nullptr;
+    }
+  }
+  // clear the vector of dtds
+  this->schemasPaths.clear();
+//
+}
+
+void Libxml::clearAll(const Napi::CallbackInfo& info) {
+  this->freeXml(info);
+  this->freeDtds(info);
+  this->freeSchemas(info);
+  xmlCleanupParser();
 }
 
 // Initialize native add-on

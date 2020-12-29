@@ -42,15 +42,15 @@ private:
   Napi::Value loadXmlFromString(const Napi::CallbackInfo& info);
   Napi::Value loadDtds(const Napi::CallbackInfo& info);
   // // static Napi::Value loadDtdsFromString(const Napi::CallbackInfo& info);
-  // static Napi::Value loadSchemas(const Napi::CallbackInfo& info);
+  Napi::Value loadSchemas(const Napi::CallbackInfo& info);
   Napi::Value validateAgainstDtds(const Napi::CallbackInfo& info);
-  // static Napi::Value validateAgainstSchemas(const Napi::CallbackInfo& info);
+  Napi::Value validateAgainstSchemas(const Napi::CallbackInfo& info);
   Napi::Value xpathSelect(const Napi::CallbackInfo& info);
   Napi::Value getDtd(const Napi::CallbackInfo& info);
   void freeXml(const Napi::CallbackInfo& info);
-  Napi::Value freeDtds(const Napi::CallbackInfo& info);
-  // static Napi::Value freeSchemas(const Napi::CallbackInfo& info);
-  // static Napi::Value clearAll(const Napi::CallbackInfo& info);
+  void freeDtds(const Napi::CallbackInfo& info);
+  void freeSchemas(const Napi::CallbackInfo& info);
+  void clearAll(const Napi::CallbackInfo& info);
 };
 
 #endif

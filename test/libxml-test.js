@@ -200,45 +200,45 @@ describe('Node-Libxml', function () {
     libxml.freeDtds();
   });
   // // SCHEMAS
-  // it('Should return wellformed & valid on a wellformed & valid xml SCHEMA', function () {
-  //   let libxml = new Libxml();
-  //   let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
-  //   libxml.loadSchemas(['test/xsd/MARC21slim.xsd']);
-  //   let testDefaultV = libxml.validateAgainstSchemas();
-  //   expect(testDefaultWf).to.be.true;
-  //   expect(testDefaultV).to.be.a('string');
-  //   libxml.freeXml();
-  //   libxml.freeSchemas();
-  // });
-  // it('Should return errors for invalid against schema', function () {
-  //   let libxml = new Libxml();
-  //   let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
-  //   libxml.loadSchemas(['test/xsd/MARC21slim-bad.xsd']);
-  //   let testDefaultV = libxml.validateAgainstSchemas();
-  //   expect(testDefaultWf).to.be.true;
-  //   expect(testDefaultV).to.be.false;
-  //   expect(libxml).to.have.a.property('validationSchemaErrors');
-  //   expect(libxml.validationSchemaErrors).to.be.a('object');
-  //   expect(libxml.validationSchemaErrors).to.have.a.property('test/xsd/MARC21slim-bad.xsd');
-  //   expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd']).to.be.a('array');
-  //   expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('column');
-  //   expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('line');
-  //   expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('message');
-  //   libxml.freeXml();
-  //   libxml.freeSchemas();
-  // });
-  // it('Should return expected value and not crash when multiple clean of schemas', function () {
-  //   let libxml = new Libxml();
-  //   let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
-  //   libxml.loadSchemas(['test/xsd/MARC21slim-bad.xsd','test/xsd/MARC21slim.xsd']);
-  //   let testDefaultV = libxml.validateAgainstSchemas();
-  //   expect(testDefaultWf).to.be.true;
-  //   expect(testDefaultV).to.be.a('string');
-  //   libxml.freeXml();
-  //   libxml.freeSchemas();
-  // });
-  // it('Should not throw error when use clearAll function to clear all memory libxml', function () {
-  //   let libxml = new Libxml();
-  //   libxml.clearAll();
-  // });
+  it('Should return wellformed & valid on a wellformed & valid xml SCHEMA', function () {
+    let libxml = new Libxml();
+    let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
+    libxml.loadSchemas(['test/xsd/MARC21slim.xsd']);
+    let testDefaultV = libxml.validateAgainstSchemas();
+    expect(testDefaultWf).to.be.true;
+    expect(testDefaultV).to.be.a('string');
+    libxml.freeXml();
+    libxml.freeSchemas();
+  });
+  it('Should return errors for invalid against schema', function () {
+    let libxml = new Libxml();
+    let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
+    libxml.loadSchemas(['test/xsd/MARC21slim-bad.xsd']);
+    let testDefaultV = libxml.validateAgainstSchemas();
+    expect(testDefaultWf).to.be.true;
+    expect(testDefaultV).to.be.false;
+    expect(libxml).to.have.a.property('validationSchemaErrors');
+    expect(libxml.validationSchemaErrors).to.be.a('object');
+    expect(libxml.validationSchemaErrors).to.have.a.property('test/xsd/MARC21slim-bad.xsd');
+    expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd']).to.be.a('array');
+    expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('column');
+    expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('line');
+    expect(libxml.validationSchemaErrors['test/xsd/MARC21slim-bad.xsd'][0]).to.have.a.property('message');
+    libxml.freeXml();
+    libxml.freeSchemas();
+  });
+  it('Should return expected value and not crash when multiple clean of schemas', function () {
+    let libxml = new Libxml();
+    let testDefaultWf = libxml.loadXml('test/data/test-valid-schema.xml');
+    libxml.loadSchemas(['test/xsd/MARC21slim-bad.xsd','test/xsd/MARC21slim.xsd']);
+    let testDefaultV = libxml.validateAgainstSchemas();
+    expect(testDefaultWf).to.be.true;
+    expect(testDefaultV).to.be.a('string');
+    libxml.freeXml();
+    libxml.freeSchemas();
+  });
+  it('Should not throw error when use clearAll function to clear all memory libxml', function () {
+    let libxml = new Libxml();
+    libxml.clearAll();
+  });
 });
