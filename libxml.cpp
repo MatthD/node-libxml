@@ -16,6 +16,7 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
     InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
     InstanceMethod("loadDtds", &Libxml::loadDtds),
     InstanceMethod("validateAgainstDtds", &Libxml::validateAgainstDtds),
+    InstanceMethod("xpathSelect", &Libxml::xpathSelect),
     InstanceMethod("getDtd", &Libxml::getDtd),
     InstanceMethod("freeXml", &Libxml::freeXml),
     InstanceMethod("freeDtds", &Libxml::freeDtds)
@@ -231,6 +232,54 @@ Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
     this->Value().Set("validationDtdErrors", errorsValidations);
     return Napi::Boolean::New(env, false);
   }
+}
+
+Napi::Value Libxml::xpathSelect(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  if (info.Length() < 1){
+    Napi::TypeError::New(env, "xpathSelect requires at least 1 argument").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  Napi::EscapableHandleScope scope(env);
+  Napi::Value res;
+  Napi::String val = info[0].ToString();
+  //Need to keep string in memory and get its const char* casted version for libxml2
+  std::string xpathStr = val.Utf8Value();
+  const char* xpathToGet(xpathStr.c_str());
+  xmlChar * xpathExpr = xmlCharStrdup(xpathToGet);
+  xmlXPathContextPtr xpathCtx;
+  xmlXPathObjectPtr xpathObj;
+  /* Create xpath evaluation context */
+  xpathCtx = xmlXPathNewContext(this->docPtr);
+  if(xpathCtx == nullptr) {
+    Napi::Error::New(env, "Error: unable to create new XPath context").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  /* Evaluate xpath expression */
+  xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
+  if(xpathObj == nullptr) {
+    xmlXPathFreeContext(xpathCtx);
+    return Napi::Boolean::New(env, false);
+  }
+  else if(xpathObj) {
+    switch (xpathObj->type) {
+    case XPATH_BOOLEAN:
+      res = Napi::Boolean::New(env, xpathObj->boolval);
+      break;
+    case XPATH_NUMBER:
+      res = Napi::Number::New(env, xpathObj->floatval);
+      break;
+    case XPATH_STRING:
+      res = Napi::String::New(env, (const char *)xpathObj->stringval);
+      break;
+    default:
+      res = env.Null();
+      break;
+    }
+  }
+  xmlXPathFreeObject(xpathObj);
+  xmlXPathFreeContext(xpathCtx);
+  return scope.Escape(res);
 }
 
 Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {
