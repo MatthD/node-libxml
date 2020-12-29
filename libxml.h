@@ -43,7 +43,7 @@ private:
   Napi::Value loadDtds(const Napi::CallbackInfo& info);
   // // static Napi::Value loadDtdsFromString(const Napi::CallbackInfo& info);
   // static Napi::Value loadSchemas(const Napi::CallbackInfo& info);
-  // static Napi::Value validateAgainstDtds(const Napi::CallbackInfo& info);
+  Napi::Value validateAgainstDtds(const Napi::CallbackInfo& info);
   // static Napi::Value validateAgainstSchemas(const Napi::CallbackInfo& info);
   // static Napi::Value xpathSelect(const Napi::CallbackInfo& info);
   Napi::Value getDtd(const Napi::CallbackInfo& info);

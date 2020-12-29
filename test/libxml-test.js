@@ -15,16 +15,16 @@ describe('Node-Libxml', function () {
     libxml.freeDtds();
   });
   // Wellformed & valid
-  // it('Should return wellformed & valid on a wellformed & valid xml', function () {
-  //   let libxml = new Libxml();
-  //   let testDefaultWf = libxml.loadXml('test/data/test-default.xml');
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-  //   let testDefaultV = libxml.validateAgainstDtds();
-  //   expect(testDefaultWf).to.be.true;
-  //   expect(testDefaultV).to.be.a('string');
-  //   libxml.freeXml();
-  //   libxml.freeDtds();
-  // });
+  it('Should return wellformed & valid on a wellformed & valid xml', function () {
+    let libxml = new Libxml();
+    let testDefaultWf = libxml.loadXml('test/data/test-default.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let testDefaultV = libxml.validateAgainstDtds();
+    expect(testDefaultWf).to.be.true;
+    expect(testDefaultV).to.be.a('string');
+    libxml.freeXml();
+    libxml.freeDtds();
+  });
   // // it('Should return wellformed & valid on a wellformed & valid xml From String', function () {
   // //   let libxml = new Libxml();
   // //   let testDefaultStr = fs.readFileSync('test/data/test-default.xml','utf8');
@@ -59,42 +59,42 @@ describe('Node-Libxml', function () {
     expect(libxml).not.have.property("wellFormedErrors");
     libxml.freeXml();
   });
-  // // Wellformed & invalid
-  // it('Should return wellformed & invalid on a wellformed BUT invalid xml', function () {
-  //   let libxml = new Libxml();
-  //   let testInvalidWf = libxml.loadXml('test/data/test-not-valid-dtd.xml');
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-  //   let testInvalid = libxml.validateAgainstDtds(3);
-  //   expect(testInvalidWf).to.be.true;
-  //   expect(testInvalid).to.be.false;
-  //   expect(libxml).to.have.property('validationDtdErrors');
-  //   expect(libxml.validationDtdErrors).to.be.an('object');
-  //   expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
-  //   libxml.freeDtds();
-  //   libxml.freeXml();
-  // });
-  // it('Should return wellformed & invalid on a wellformed BUT invalid xml FROM STRING XML', function () {
-  //   let libxml = new Libxml();
-  //   let testInvalidWfStr = fs.readFileSync('test/data/test-not-valid-dtd.xml');
-  //   let testInvalidWf = libxml.loadXmlFromString(testInvalidWfStr);
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-  //   let testInvalid = libxml.validateAgainstDtds(3);
-  //   expect(testInvalidWf).to.be.true;
-  //   expect(testInvalid).to.be.false;
-  //   expect(libxml).to.have.property('validationDtdErrors');
-  //   expect(libxml.validationDtdErrors).to.be.an('object');
-  //   expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
-  //   libxml.freeDtds();
-  //   libxml.freeXml();
-  // });
+  // Wellformed & invalid
+  it('Should return wellformed & invalid on a wellformed BUT invalid xml', function () {
+    let libxml = new Libxml();
+    let testInvalidWf = libxml.loadXml('test/data/test-not-valid-dtd.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let testInvalid = libxml.validateAgainstDtds(3);
+    expect(testInvalidWf).to.be.true;
+    expect(testInvalid).to.be.false;
+    expect(libxml).to.have.property('validationDtdErrors');
+    expect(libxml.validationDtdErrors).to.be.an('object');
+    expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
+    libxml.freeDtds();
+    libxml.freeXml();
+  });
+  it('Should return wellformed & invalid on a wellformed BUT invalid xml FROM STRING XML', function () {
+    let libxml = new Libxml();
+    let testInvalidWfStr = fs.readFileSync('test/data/test-not-valid-dtd.xml', 'utf8');
+    let testInvalidWf = libxml.loadXmlFromString(testInvalidWfStr);
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let testInvalid = libxml.validateAgainstDtds(3);
+    expect(testInvalidWf).to.be.true;
+    expect(testInvalid).to.be.false;
+    expect(libxml).to.have.property('validationDtdErrors');
+    expect(libxml.validationDtdErrors).to.be.an('object');
+    expect(libxml.validationDtdErrors['test/dtd/mydoctype.dtd'].length).to.be.equal(3);
+    libxml.freeDtds();
+    libxml.freeXml();
+  });
   // not wellformed
   it('Should return Not Wellformed & invalid on a not wellformed xml', function () {
     let libxml = new Libxml();
     let wellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
-    // libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-    // let wellformedV = libxml.validateAgainstDtds();
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let wellformedV = libxml.validateAgainstDtds();
     expect(wellformed).to.be.false;
-    // expect(wellformedV).to.be.false;
+    expect(wellformedV).to.be.false;
     expect(libxml).to.have.property('wellformedErrors');
     expect(libxml.wellformedErrors).to.be.an('array');
     libxml.freeXml();
@@ -142,62 +142,62 @@ describe('Node-Libxml', function () {
   //   libxml.freeXml();
   // });
   // // // ABOVE IS ALL THE SAME WITH MEMORY MANUAL MANADGEMENT
-  // it('should free XML memory & infos when asked in manual mod On not wellformed xml', function () {
-  //   let libxml = new Libxml(true);
-  //   let wellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
-  //   expect(wellformed).to.be.false;
-  //   expect(libxml).to.have.property('wellformedErrors');
-  //   expect(libxml.wellformedErrors).to.be.an('array');
-  //   expect(libxml.wellformedErrors.length).to.be.at.least(1);
-  //   libxml.freeXml();
-  //   expect(libxml).not.to.have.property('wellformedErrors');
-  // });
-  // it('should  not crash when freeUp memory xml multiple time!', function () {
-  //   let libxml = new Libxml(true);
-  //   let wellFormed = libxml.loadXml('test/data/test-default.xml');
-  //   expect(wellFormed).to.be.true;
-  //   expect(libxml).not.to.have.property('wellformedErrors');
-  //   libxml.freeXml();
-  //   libxml.freeXml();
-  //   libxml.freeXml();
-  //   expect(libxml).not.to.have.property('wellformedErrors');
-  // });
-  // it('Should return intended values after multiple CLEAN!', function () {
-  //   let libxml = new Libxml();
-  //   let wellformed = libxml.loadXml('test/data/test-not-valid-dtd.xml');
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd']);
-  //   let wellformedV = libxml.validateAgainstDtds();
-  //   expect(wellformed).to.be.true;
-  //   expect(wellformedV).to.be.false;
-  //   expect(libxml).to.not.have.property('wellformedErrors');
-  //   libxml.freeXml();
-  //   libxml.freeDtds();
-  //   libxml.freeDtds();
-  //   wellformed = libxml.loadXml('test/data/test-default.xml');
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd', 'test/dtd/myBADdoctype.dtd']);
-  //   wellformedV = libxml.validateAgainstDtds();
-  //   expect(wellformed).to.be.true;
-  //   expect(wellformedV).to.be.a('string');
-  //   expect(wellformedV).to.be.equal('test/dtd/mydoctype.dtd');
-  //   expect(libxml).to.not.have.property('wellformedErrors');
-  // });
-  // it('should not crash when loads multiple dtd it two times', function () {
-  //   let libxml = new Libxml();
-  //   let wellformed = libxml.loadXml('test/data/test-not-valid-dtd.xml');
-  //   libxml.loadDtds(['test/dtd/mydoctype.dtd', 'test/dtd/myBADdoctype.dtd']);
-  //   libxml.loadDtds(['test/dtd/mydoctype2.dtd', 'test/dtd/myBADdoctype2.dtd']);
-  //   let wellformedV = libxml.validateAgainstDtds();
-  //   expect(wellformed).to.be.true;
-  //   expect(wellformedV).to.be.false;
-  //   expect(libxml).to.not.have.property('wellformedErrors');
-  //   expect(libxml).to.have.property('validationDtdErrors');
-  //   expect(libxml.validationDtdErrors).to.have.property('test/dtd/mydoctype.dtd');
-  //   expect(libxml.validationDtdErrors).to.have.property('test/dtd/mydoctype2.dtd');
-  //   expect(libxml.validationDtdErrors).to.have.property('test/dtd/mydoctype2.dtd');
-  //   expect(libxml.validationDtdErrors).to.have.property('test/dtd/myBADdoctype2.dtd');
-  //   libxml.freeXml();
-  //   libxml.freeDtds();
-  // });
+  it('should free XML memory & infos when asked in manual mod On not wellformed xml', function () {
+    let libxml = new Libxml(true);
+    let wellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
+    expect(wellformed).to.be.false;
+    expect(libxml).to.have.property('wellformedErrors');
+    expect(libxml.wellformedErrors).to.be.an('array');
+    expect(libxml.wellformedErrors.length).to.be.at.least(1);
+    libxml.freeXml();
+    expect(libxml).not.to.have.property('wellformedErrors');
+  });
+  it('should  not crash when freeUp memory xml multiple time!', function () {
+    let libxml = new Libxml(true);
+    let wellFormed = libxml.loadXml('test/data/test-default.xml');
+    expect(wellFormed).to.be.true;
+    expect(libxml).not.to.have.property('wellformedErrors');
+    libxml.freeXml();
+    libxml.freeXml();
+    libxml.freeXml();
+    expect(libxml).not.to.have.property('wellformedErrors');
+  });
+  it('Should return intended values after multiple CLEAN!', function () {
+    let libxml = new Libxml();
+    let wellformed = libxml.loadXml('test/data/test-not-valid-dtd.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd']);
+    let wellformedV = libxml.validateAgainstDtds();
+    expect(wellformed).to.be.true;
+    expect(wellformedV).to.be.false;
+    expect(libxml).to.not.have.property('wellformedErrors');
+    libxml.freeXml();
+    libxml.freeDtds();
+    libxml.freeDtds();
+    wellformed = libxml.loadXml('test/data/test-default.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd', 'test/dtd/myBADdoctype.dtd']);
+    wellformedV = libxml.validateAgainstDtds();
+    expect(wellformed).to.be.true;
+    expect(wellformedV).to.be.a('string');
+    expect(wellformedV).to.be.equal('test/dtd/mydoctype.dtd');
+    expect(libxml).to.not.have.property('wellformedErrors');
+  });
+  it('should not crash when loads multiple dtd in two rounds', function () {
+    let libxml = new Libxml();
+    let wellformed = libxml.loadXml('test/data/test-not-valid-dtd.xml');
+    libxml.loadDtds(['test/dtd/mydoctype.dtd', 'test/dtd/myBADdoctype.dtd']);
+    libxml.loadDtds(['test/dtd/mydoctype2.dtd', 'test/dtd/myBADdoctype2.dtd']);
+    let wellformedV = libxml.validateAgainstDtds();
+    expect(wellformed).to.be.true;
+    expect(wellformedV).to.be.false;
+    expect(libxml).to.not.have.property('wellformedErrors');
+    expect(libxml).to.have.property('validationDtdErrors');
+    expect(libxml.validationDtdErrors).to.have.property('test/dtd/mydoctype.dtd');
+    expect(libxml.validationDtdErrors).to.have.property('test/dtd/myBADdoctype.dtd');
+    expect(libxml.validationDtdErrors).to.have.property('test/dtd/mydoctype2.dtd');
+    expect(libxml.validationDtdErrors).to.have.property('test/dtd/myBADdoctype2.dtd');
+    libxml.freeXml();
+    libxml.freeDtds();
+  });
   // // SCHEMAS
   // it('Should return wellformed & valid on a wellformed & valid xml SCHEMA', function () {
   //   let libxml = new Libxml();

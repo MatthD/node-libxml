@@ -15,6 +15,7 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
     InstanceMethod("loadXml", &Libxml::loadXml),
     InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
     InstanceMethod("loadDtds", &Libxml::loadDtds),
+    InstanceMethod("validateAgainstDtds", &Libxml::validateAgainstDtds),
     InstanceMethod("getDtd", &Libxml::getDtd),
     InstanceMethod("freeXml", &Libxml::freeXml),
     InstanceMethod("freeDtds", &Libxml::freeDtds)
@@ -159,6 +160,77 @@ Napi::Value Libxml::loadDtds(const Napi::CallbackInfo& info) {
     this->Value().Delete("dtdsLoadedErrors");
   }
   return env.Undefined();
+}
+
+Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if(this->dtdsPaths.empty()){
+    return env.Null();
+  }
+
+  // if first param is number then apply it. If not then silently drop it 
+  if(info.Length() > 0 && info[0].IsNumber()) {
+    XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber());
+  }
+
+  //Setting context of validation 
+  bool oneOfTheDtdValidate = false;
+  string dtdValidateName;
+
+
+  //If length 0, return null; to implement
+  Napi::Object errorsValidations = Napi::Object::New(env);
+
+  for (vector<xmlDtdPtr>::iterator dtd = this->dtdsPaths.begin(); dtd != this->dtdsPaths.end() ; ++dtd){
+    const char* dtdName = (const char *)(*dtd)->SystemID;
+
+    //set up error handling
+    Napi::Array errors = Napi::Array::New(env);
+    xmlResetLastError();
+    XmlSyntaxError::env = &env;
+    xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+    
+    Napi::String SystemIDString = Napi::String::New(env, dtdName);
+    // Context creation for validation
+    xmlValidCtxtPtr vctxt;
+    if ((vctxt = xmlNewValidCtxt()) == nullptr) {
+      continue;
+    }
+    //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
+    //xmlSetStructuredErrorFunc(vctxt, nullptr);
+
+    vctxt->userData = nullptr;
+    vctxt->error = nullptr;
+    vctxt->warning = nullptr;
+
+    // Validation
+    int result = xmlValidateDtd(vctxt, this->docPtr, *dtd);
+
+    // drop error handling function and free context
+    xmlSetStructuredErrorFunc(nullptr, nullptr);
+    xmlFreeValidCtxt(vctxt);
+    //If validation was successfull than break the loop
+    if(result != 0){
+      oneOfTheDtdValidate = true;
+      dtdValidateName = dtdName;
+      break;
+    }
+    // If validation failed add result to error object
+    errorsValidations.Set(SystemIDString, errors);
+  }
+  if(oneOfTheDtdValidate){
+    this->Value().Delete("validationDtdErrors");
+    if(dtdValidateName.length()){
+      return Napi::String::New(env, dtdValidateName);
+    }else{
+      return Napi::Boolean::New(env, true);
+    }
+  }else{
+    this->Value().Set("validationDtdErrors", errorsValidations);
+    return Napi::Boolean::New(env, false);
+  }
 }
 
 Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {
