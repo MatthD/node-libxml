@@ -14,6 +14,7 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
   Napi::Function func = DefineClass(env, "Libxml", {
     InstanceMethod("loadXml", &Libxml::loadXml),
     InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
+    InstanceMethod("loadDtds", &Libxml::loadDtds),
     InstanceMethod("getDtd", &Libxml::getDtd),
     InstanceMethod("freeXml", &Libxml::freeXml)
     });
@@ -116,6 +117,47 @@ Napi::Value Libxml::loadXmlFromString(const Napi::CallbackInfo& info) {
     this->Value().Delete("wellformedErrors");
   }
   return Napi::Boolean::New(env, true);
+}
+
+Napi::Value Libxml::loadDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  if (info.Length() < 1){
+    Napi::TypeError::New(env, "loadDtds requires at least 1 argument, an array of DTDs").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  if(!info[0].IsArray()){
+    Napi::TypeError::New(env, "loadDtds requires an array").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  Napi::EscapableHandleScope scope(env);
+  Napi::Array dtdPaths = info[0].As<Napi::Array>();
+  Napi::Array errors = Napi::Array::New(env);
+  xmlResetLastError();
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+  for (unsigned int i = 0; i < dtdPaths.Length(); i++){
+    //Skip elements silently which are not strings
+    if(dtdPaths.Get(i).IsString()) {
+      std::string dtdPath = dtdPaths.Get(i).ToString().Utf8Value();
+      xmlChar* pathDTDCasted = xmlCharStrdup(dtdPath.c_str());
+      xmlDtdPtr dtd =  xmlParseDTD(NULL, pathDTDCasted);
+      if (dtd == nullptr) {
+        //DTD is bad, we set error and not assign it
+        XmlSyntaxError::PushToArray(errors, dtdPath.c_str());
+        continue;
+      }
+      this->dtdsPaths.push_back(dtd);
+    }
+  }
+  xmlSetStructuredErrorFunc(nullptr, nullptr);
+  // We set dtdsLoadedErrors property for js side
+  if(errors.Length()){
+    this->Value().Set("dtdsLoadedErrors", errors);
+  } else {
+    this->Value().Delete("dtdsLoadedErrors");
+  }
+  return env.Undefined();
 }
 
 Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {

@@ -61,3 +61,13 @@ void XmlSyntaxError::PushToArray(void *errs, xmlError *error)
   Napi::Value castedError = {XmlSyntaxError::BuildSyntaxError(error, *XmlSyntaxError::env)};
   errors.Set(errors.Length(), castedError);
 }
+
+void XmlSyntaxError::PushToArray(Napi::Array& errors, const char* errorMessage)
+{
+  if (errors.Length() >= maxError)
+  {
+    return;
+  }
+  Napi::String messageToPush = Napi::String::New(*XmlSyntaxError::env, errorMessage);
+  errors.Set(errors.Length(), messageToPush);
+}

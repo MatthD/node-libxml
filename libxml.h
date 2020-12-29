@@ -40,7 +40,7 @@ private:
   static Napi::FunctionReference constructor;
   Napi::Value loadXml(const Napi::CallbackInfo &info);
   Napi::Value loadXmlFromString(const Napi::CallbackInfo& info);
-  // static Napi::Value loadDtds(const Napi::CallbackInfo& info);
+  Napi::Value loadDtds(const Napi::CallbackInfo& info);
   // // static Napi::Value loadDtdsFromString(const Napi::CallbackInfo& info);
   // static Napi::Value loadSchemas(const Napi::CallbackInfo& info);
   // static Napi::Value validateAgainstDtds(const Napi::CallbackInfo& info);

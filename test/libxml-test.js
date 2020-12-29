@@ -5,15 +5,15 @@ const expect = require('chai').expect;
 const fs = require('fs');
 
 describe('Node-Libxml', function () {
-  // it('Should return a list of errored path if dtd path is bad', function () {
-  //   let libxml = new Libxml();
-  //   libxml.loadDtds(['test/dtd/mydoctype-not-existing.dtd']);
-  //   expect(libxml).to.have.a.property('dtdsLoadedErrors');
-  //   expect(libxml.dtdsLoadedErrors).to.be.a('array');
-  //   expect(libxml.dtdsLoadedErrors).to.include('test/dtd/mydoctype-not-existing.dtd');
-  //   libxml.freeXml();
-  //   libxml.freeDtds();
-  // });
+  it('Should return a list of errored path if dtd path is bad', function () {
+    let libxml = new Libxml();
+    libxml.loadDtds(['test/dtd/mydoctype-not-existing.dtd']);
+    expect(libxml).to.have.a.property('dtdsLoadedErrors');
+    expect(libxml.dtdsLoadedErrors).to.be.a('array');
+    expect(libxml.dtdsLoadedErrors).to.include('test/dtd/mydoctype-not-existing.dtd');
+    libxml.freeXml();
+    // libxml.freeDtds();
+  });
   // Wellformed & valid
   // it('Should return wellformed & valid on a wellformed & valid xml', function () {
   //   let libxml = new Libxml();
