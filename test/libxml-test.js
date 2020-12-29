@@ -12,7 +12,7 @@ describe('Node-Libxml', function () {
     expect(libxml.dtdsLoadedErrors).to.be.a('array');
     expect(libxml.dtdsLoadedErrors).to.include('test/dtd/mydoctype-not-existing.dtd');
     libxml.freeXml();
-    // libxml.freeDtds();
+    libxml.freeDtds();
   });
   // Wellformed & valid
   // it('Should return wellformed & valid on a wellformed & valid xml', function () {

@@ -16,7 +16,8 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
     InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
     InstanceMethod("loadDtds", &Libxml::loadDtds),
     InstanceMethod("getDtd", &Libxml::getDtd),
-    InstanceMethod("freeXml", &Libxml::freeXml)
+    InstanceMethod("freeXml", &Libxml::freeXml),
+    InstanceMethod("freeDtds", &Libxml::freeDtds)
     });
 
   // Create a peristent reference to the class constructor. This will allow
@@ -193,7 +194,8 @@ Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {
 }
 
 void Libxml::freeXml(const Napi::CallbackInfo& info) {
-  Napi::HandleScope scope(info.Env());
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
   // Delete Javascript property
   this->Value().Delete("wellformedErrors");
   // If doc is already null, just do nothing and only available on manual mod
@@ -203,6 +205,28 @@ void Libxml::freeXml(const Napi::CallbackInfo& info) {
   // Force clear the memory loaded for XML
   xmlFreeDoc(this->docPtr);
   this->docPtr = nullptr;
+}
+
+Napi::Value Libxml::freeDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  // Delete Javascript property
+  this->Value().Delete("dtdsLoadedErrors");
+  this->Value().Delete("validationDtdErrors");
+  // If dtds is already empty, just stop here
+  if(this->dtdsPaths.empty()){
+    return env.Undefined();
+  }
+  for (vector<xmlDtdPtr>::iterator dtd = this->dtdsPaths.begin(); dtd != this->dtdsPaths.end() ; ++dtd){
+    if(*dtd != nullptr){
+      // Force clear memory DTD loaded
+      xmlFreeDtd(*dtd);
+      *dtd = nullptr;
+    }
+  }
+  // clear the vector of dtds
+  this->dtdsPaths.clear();
+  return env.Undefined();
 }
 
 // Initialize native add-on
