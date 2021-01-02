@@ -7,16 +7,17 @@
 
 class XmlSyntaxError
 {
-  static int maxError;
+  static uint32_t maxError;
 
 public:
-  static Napi::Env env;
+  static Napi::Env* env;
   static void ChangeMaxNumberOfError(int max);
 
-  // push xmlError onto v8::Array
+  // push xmlError onto Napi::Array
   static void PushToArray(void *errs, xmlError *error);
+  static void PushToArray(Napi::Array& errs, const char* errorMessage);
 
-  // create a v8 object for the syntax eror
+  // create a Napi object for the syntax eror
   static Napi::Value BuildSyntaxError(xmlError *error, Napi::Env env);
 };
 
