@@ -54,10 +54,8 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
     Napi::TypeError::New(env, "loadXml requires at least 1 argument").ThrowAsJavaScriptException();
     return Napi::Boolean::New(env, false);
   }
-  cout << "before libxml" << endl;
   int options;
   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  cout << "after libxml 1" << endl;
   Napi::Array errors = Napi::Array::New(env);
   xmlResetLastError();
   XmlSyntaxError::env = &env;
@@ -65,20 +63,14 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
                             XmlSyntaxError::PushToArray);
   if (this->docPtr != nullptr)
   {
-    cout << "after libxml 2" << endl;
     xmlFreeDoc(this->docPtr);
     this->docPtr = nullptr;
   }
-  cout << "after libxml 3" << endl;
   Napi::String path = info[0].As<Napi::String>();
   this->path = path.ToString();
-  cout << "after libxml 4" << endl;
-  cout << this->path.c_str() << endl;
   const char *pathToRead = this->path.c_str();
   this->docPtr = xmlReadFile(pathToRead, NULL, options);
-  cout << "after libxml 5" << endl;
   xmlSetStructuredErrorFunc(NULL, NULL);
-  cout << "after libxml 6" << endl;
   if (this->docPtr == NULL)
   {
     this->Value().Set("wellformedErrors", errors);

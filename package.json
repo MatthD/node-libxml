@@ -11,30 +11,36 @@
     "test": "mocha",
     "install": "node-pre-gyp install --fallback-to-build",
     "build": "node-pre-gyp build",
-    "build:dev": "node-gyp -j 16 build --debug",
+    "build:dev": "node-gyp -j 4 build --debug",
     "prebuild": "node-pre-gyp configure --enable-build-type=debug"
   },
   "author": "MatthD",
   "license": "MIT",
   "dependencies": {
-    "node-addon-api": "2.0.0",
     "bindings": "^1.5.0",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
-    "node-gyp": "6.1.0",
-    "node-addon-api": "^2.0.0"
+    "node-addon-api": "^2.0.0",
+    "node-gyp": "^7.1.0"
   },
   "binary": {
     "module_name": "xml",
-    "module_path": "./build/Release/",
-    "remote_path": "{version}",
-    "host": "https://github.com/jupitex/node-libxml/releases/download/"
+    "module_path": "./build/Release/{napi_build_version}/",
+    "remote_path": "{version}/",
+    "package_name": "{platform}-{arch}-napi-v{napi_build_version}.tar.gz",
+    "host": "https://github.com/jupitex/node-libxml/releases/download/",
+    "napi_versions": [
+      4,
+      5,
+      6,
+      7
+    ]
   },
   "gypfile": true,
-  "bundledDependencies": [
-    "node-pre-gyp"
-  ],
   "devDependencies": {
-    "node-pre-gyp": "0.14.0"
-  }
+    "node-pre-gyp": "0.17.0"
+  },
+  "bundleDependencies": [
+    "node-pre-gyp"
+  ]
 }

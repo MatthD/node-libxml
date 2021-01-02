@@ -28,7 +28,6 @@ Node-libxml has been thought differently than [libxmljs](https://github.com/libx
 - You want to validate against DTD / schema on multiple documents with just ONE dtd/schema loaded in memory (libxmljs loads it on each validation request), so it's clearly by far fastest!
 
 
-
 ## Install
 
 ```bash
@@ -158,3 +157,13 @@ A function of libxml to free all the memory taken by libxml2
 `TAKE nothing & RETURN nothin`
 free all memory in all instance in all fork using by libxml.
 
+
+## Contribute
+
+### Install
+- `npm i`
+- then move the build-tmp-napi-*{anyversionyougot} as -> `mv build-tmp-napi-v7 build` __(for the moment I did not found how to build directly to buiuld forlder with pre-gyp for n-api)__
+- `npm test` should pass 😎
+
+## Important notes
+Travis & appveyor cannot be used anymore with n-api because auto-publish from node-pre-gyp-github not working anymore + we have now n release for one node version
