@@ -6,13 +6,10 @@ os:
  
 env:
   matrix:
-    - NODE_VERSION="10.15"
-    - NODE_VERSION="8.6"
-    - NODE_VERSION="6.11"
-    - NODE_VERSION="4.4"
+    - NODE_VERSION="14.12"
   include:
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
  
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
@@ -31,10 +28,15 @@ before_install:
 - git config --global user.name "MatthD"
 
 install:
-# - npm install --build-from-source
-- npm i nan
+- npm install
+- node-pre-gyp clean
 - node-pre-gyp configure --enable-build-type=release
 - node-pre-gyp build
+- mkdir -p Release/build/4 Release/build/5 Release/build/6 Release/build/7
+- mv build-tmp-napi-v4/Release/xml.node build/4/
+- mv build-tmp-napi-v5/Release/xml.node build/5/
+- mv build-tmp-napi-v6/Release/xml.node build/6/
+- mv build-tmp-napi-v7/Release/xml.node build/7/
 - node-pre-gyp package
 
 script:

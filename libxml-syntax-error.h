@@ -5,17 +5,21 @@
 
 #include "libxml.h"
 
-class XmlSyntaxError {
-  static int maxError;
+class XmlSyntaxError
+{
+  static uint32_t maxError;
+
 public:
+  static Napi::Env* env;
   static void ChangeMaxNumberOfError(int max);
 
-  // push xmlError onto v8::Array
-  static void PushToArray(void* errs, xmlError* error);
+  // push xmlError onto Napi::Array
+  static void PushToArray(void *errs, xmlError *error);
+  static void PushToArray(Napi::Array& errs, const char* errorMessage);
 
-  // create a v8 object for the syntax eror
-  static v8::Local<v8::Value> BuildSyntaxError(xmlError* error);
+  // create a Napi object for the syntax eror
+  static Napi::Value BuildSyntaxError(xmlError *error, Napi::Env env);
 };
 
 // LIBXML_SYNTAX_ERROR
-#endif  
+#endif

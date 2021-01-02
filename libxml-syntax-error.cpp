@@ -1,57 +1,73 @@
 /**
-* This is the Errros Class script, for wellformed & validation DTD
+* This is the Errors Class script, for wellformed & validation DTD
 */
 #include <cstring>
 #include <iostream>
 #include "libxml-syntax-error.h"
 
-void setStringField(v8::Local<v8::Object> obj, const char* name, const char* value) {
-  Nan::HandleScope scope;
-  if (!value) {
+void setStringField(Napi::Object obj, const char *name, const char *value, Napi::Env env)
+{
+  Napi::HandleScope scope(env);
+  if (!value)
+  {
     return;
   }
-  Nan::Set(obj, Nan::New<v8::String>(name).ToLocalChecked(), Nan::New<v8::String>(value, strlen(value)).ToLocalChecked());
+  obj.Set(name, Napi::String::New(env, value));
 }
 
-void setNumericField(v8::Local<v8::Object> obj, const char* name, const int value) {
-  Nan::HandleScope scope;
-  Nan::Set(obj, Nan::New<v8::String>(name).ToLocalChecked(), Nan::New<v8::Int32>(value));
+void setNumericField(Napi::Object obj, const char *name, const int value, Napi::Env env)
+{
+  Napi::HandleScope scope(env);
+  obj.Set(name, Napi::Number::New(env, value));
 }
 
-v8::Local<v8::Value>
-XmlSyntaxError::BuildSyntaxError(xmlError* error) {
-  Nan::EscapableHandleScope scope;
+Napi::Value
+XmlSyntaxError::BuildSyntaxError(xmlError *error, Napi::Env env)
+{
+  Napi::EscapableHandleScope scope(env);
 
-  v8::Local<v8::Value> err = v8::Exception::Error(
-    Nan::New<v8::String>(error->message).ToLocalChecked());
-  v8::Local<v8::Object> out = v8::Local<v8::Object>::Cast(err);
+  auto err = Napi::TypeError::New(env,
+                                  Napi::String::New(env, error->message));
+  Napi::Object out = Napi::Object::New(env);
 
-  setStringField(out, "message", error->message);
-  setNumericField(out, "level", error->level);
-  setNumericField(out, "column", error->int2);
-  setStringField(out, "file", error->file);
-  setNumericField(out, "line", error->line);
+  setStringField(out, "message", error->message, env);
+  setNumericField(out, "level", error->level, env);
+  setNumericField(out, "column", error->int2, env);
+  setStringField(out, "file", error->file, env);
+  setNumericField(out, "line", error->line, env);
 
-  if (error->int1) {
-    setNumericField(out, "int1", error->int1);
+  if (error->int1)
+  {
+    setNumericField(out, "int1", error->int1, env);
   }
-  return scope.Escape(err);
+  return out;
 }
 
-int XmlSyntaxError::maxError {100};
+uint32_t XmlSyntaxError::maxError{100};
+Napi::Env* XmlSyntaxError::env = nullptr;
 
-void XmlSyntaxError::ChangeMaxNumberOfError(int max){
+void XmlSyntaxError::ChangeMaxNumberOfError(int max)
+{
   XmlSyntaxError::maxError = max;
 }
 
-void
-XmlSyntaxError::PushToArray(void* errs, xmlError* error) {
-  Nan::HandleScope scope;
-  v8::Local<v8::Array> errors = *reinterpret_cast<v8::Local<v8::Array>*>(errs);
-  if(errors->Length() >= maxError){
+void XmlSyntaxError::PushToArray(void *errs, xmlError *error)
+{
+  Napi::Array errors = *reinterpret_cast<Napi::Array *>(errs);
+  if (errors.Length() >= maxError)
+  {
     return;
   }
-  v8::Local<v8::Function> push = v8::Local<v8::Function>::Cast(errors->Get(Nan::New<v8::String>("push").ToLocalChecked()));
-  v8::Local<v8::Value> argv[1] = { XmlSyntaxError::BuildSyntaxError(error) };
-  push->Call(errors, 1, argv);
+  Napi::Value castedError = {XmlSyntaxError::BuildSyntaxError(error, *XmlSyntaxError::env)};
+  errors.Set(errors.Length(), castedError);
+}
+
+void XmlSyntaxError::PushToArray(Napi::Array& errors, const char* errorMessage)
+{
+  if (errors.Length() >= maxError)
+  {
+    return;
+  }
+  Napi::String messageToPush = Napi::String::New(*XmlSyntaxError::env, errorMessage);
+  errors.Set(errors.Length(), messageToPush);
 }

@@ -1,539 +1,508 @@
 /**
-* This is the main Class script, We use NAN as a wrapper to libxml2 c+++ functions
+* This is the main Class script, We use NODE-ADDON-API (N-API) as a wrapper to libxml2 c++ functions
 */
 #include "libxml.h"
-
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <assert.h>
 
-using namespace std;
-using namespace v8;
+Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
+{
+  // This method is used to hook the accessor and method callbacks
+  Napi::Function func = DefineClass(env, "Libxml", {
+    InstanceMethod("loadXml", &Libxml::loadXml),
+    InstanceMethod("loadXmlFromString", &Libxml::loadXmlFromString),
+    InstanceMethod("loadDtds", &Libxml::loadDtds),
+    InstanceMethod("loadSchemas", &Libxml::loadSchemas),
+    InstanceMethod("validateAgainstDtds", &Libxml::validateAgainstDtds),
+    InstanceMethod("validateAgainstSchemas", &Libxml::validateAgainstSchemas),
+    InstanceMethod("xpathSelect", &Libxml::xpathSelect),
+    InstanceMethod("getDtd", &Libxml::getDtd),
+    InstanceMethod("freeXml", &Libxml::freeXml),
+    InstanceMethod("freeDtds", &Libxml::freeDtds),
+    InstanceMethod("freeSchemas", &Libxml::freeSchemas),
+    InstanceMethod("clearAll", &Libxml::clearAll)
+    });
 
-void Libxml::errorsHandler(void * userData, xmlErrorPtr error){
-  return;
-};
-
-Libxml::Libxml() {
-  //Maybe deport debug activation here ? in the future ..
+  // Create a peristent reference to the class constructor. This will allow
+  // a function called on a class prototype and a function
+  // called on instance of a class to be distinguished from each other.
+  constructor = Napi::Persistent(func);
+  // Call the SuppressDestruct() method on the static data prevent the calling
+  // to this destructor to reset the reference when the environment is no longer
+  // available.
+  constructor.SuppressDestruct();
+  exports.Set("Libxml", func);
+  return exports;
 }
-//Destructor 
-Libxml::~Libxml() {
-  // Free memory dtd & xml file ..
-  // If dtd is already null, just do nothing
-  if(Libxml::docPtr != NULL){
-     // Force clear memory DOC XML loaded
-    xmlFreeDoc(Libxml::docPtr);
-    Libxml::docPtr = NULL;
+
+Libxml::Libxml(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Libxml>(info)
+{
+  Napi::Env env = info.Env();
+  xmlInitParser();
+}
+
+Napi::FunctionReference Libxml::constructor;
+
+Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
+{
+  Napi::Env env = info.Env();
+  if (info.Length() < 1)
+  {
+    Napi::TypeError::New(env, "loadXml requires at least 1 argument").ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
   }
-}
-
-Nan::Persistent<v8::Function>& Libxml::constructor() {
-  static Nan::Persistent<v8::Function> myConstructor;
-  return myConstructor;
-}
-
-NAN_MODULE_INIT(Libxml::Init) {
-  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(Libxml::New);
-  tpl->SetClassName(Nan::New("Libxml").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  Nan::SetPrototypeMethod(tpl, "loadXml", loadXml);
-  Nan::SetPrototypeMethod(tpl, "loadXmlFromString", loadXmlFromString);
-  Nan::SetPrototypeMethod(tpl, "loadDtds", loadDtds);
-  // Nan::SetPrototypeMethod(tpl, "loadDtdsFromString", loadDtdsFromString);
-  Nan::SetPrototypeMethod(tpl, "loadSchemas", loadSchemas);
-  Nan::SetPrototypeMethod(tpl, "validateAgainstDtds", validateAgainstDtds);
-  Nan::SetPrototypeMethod(tpl, "validateAgainstSchemas", validateAgainstSchemas);
-  Nan::SetPrototypeMethod(tpl, "getDtd", getDtd);
-  Nan::SetPrototypeMethod(tpl, "xpathSelect", xpathSelect);
-  Nan::SetPrototypeMethod(tpl, "freeXml", freeXml);
-  Nan::SetPrototypeMethod(tpl, "freeDtds", freeDtds);
-  Nan::SetPrototypeMethod(tpl, "freeSchemas", freeSchemas);
-  Nan::SetPrototypeMethod(tpl, "clearAll", clearAll);
-
-  Local<ObjectTemplate> instTpl = tpl->InstanceTemplate();
-  constructor().Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  Nan::Set(target, Nan::New("Libxml").ToLocalChecked(), tpl->GetFunction());
-}
-
-NAN_METHOD(Libxml::New) {
-  if (info.IsConstructCall()) {
-    // this functions is important if we use multithreading !
-    xmlInitParser();
-    Libxml* obj = new Libxml();
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+  int options;
+  options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
+  Napi::Array errors = Napi::Array::New(env);
+  xmlResetLastError();
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+  if (this->docPtr != nullptr)
+  {
+    xmlFreeDoc(this->docPtr);
+    this->docPtr = nullptr;
+  }
+  Napi::String path = info[0].As<Napi::String>();
+  this->path = path.ToString();
+  const char *pathToRead = this->path.c_str();
+  this->docPtr = xmlReadFile(pathToRead, NULL, options);
+  xmlSetStructuredErrorFunc(NULL, NULL);
+  if (this->docPtr == NULL)
+  {
+    this->Value().Set("wellformedErrors", errors);
+    return Napi::Boolean::New(env, false);
   } else {
-    const int argc = 1;
-    Local<Value> argv[argc] = {info[0]};
-    Local<Function> cons = Nan::New(constructor());
-    info.GetReturnValue().Set(Nan::NewInstance(cons, argc, argv).ToLocalChecked());
+    this->Value().Delete("wellformedErrors");
   }
+  return Napi::Boolean::New(env, true);
 }
 
-NAN_METHOD(Libxml::loadXml) {
-  if (info.Length() < 1){
-    return Nan::ThrowTypeError("loadXml requires at least 1 argument");
+Napi::Value Libxml::loadXmlFromString(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  if (info.Length() < 1)
+  {
+    Napi::TypeError::New(env, "loadXmlFromString requires at least 1 argument").ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
   }
-  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
-  xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value val(info[0]->ToString());
-  const char* filename(*val);
-  // Those options shoudl be send by the user, it enable/disbale errors, warnings ..
-  int options;
-  options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  if(libxml->docPtr != NULL){
-    xmlFreeDoc(libxml->docPtr);
-    libxml->docPtr = nullptr;
-  }
-  libxml->docPtr = xmlReadFile(filename, NULL, options);
-  xmlSetStructuredErrorFunc(NULL, NULL);
 
-  if(libxml->docPtr == NULL){
+  Napi::Array errors = Napi::Array::New(env);
+  xmlResetLastError();
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+  
+  // Those options should be send by the user, it enable/disbale errors, warnings ..
+  int options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
+  if(this->docPtr != NULL){
+    xmlFreeDoc(this->docPtr);
+    this->docPtr = nullptr;
+  }
+
+  Napi::String txt = info[0].As<Napi::String>();
+  std::string txtToRead = txt.Utf8Value();
+
+  this->docPtr = xmlReadMemory(txtToRead.c_str(), strlen(txtToRead.c_str()), nullptr, nullptr, options);
+  xmlSetStructuredErrorFunc(nullptr, nullptr);
+
+  if(this->docPtr == nullptr){
     // We set property to libxml element only if notWellformed
-    info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
-    info.GetReturnValue().Set(Nan::False());
+    this->Value().Set("wellformedErrors", errors);
+    return Napi::Boolean::New(env, false);
   }else{
-    info.GetReturnValue().Set(Nan::True());
+    this->Value().Delete("wellformedErrors");
   }
+  return Napi::Boolean::New(env, true);
 }
 
-NAN_METHOD(Libxml::loadXmlFromString) {
+Napi::Value Libxml::loadDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   if (info.Length() < 1){
-    return Nan::ThrowTypeError("loadXmlFromString requires at least 1 argument");
+    Napi::TypeError::New(env, "loadDtds requires at least 1 argument, an array of DTDs").ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+  if(!info[0].IsArray()){
+    Napi::TypeError::New(env, "loadDtds requires an array").ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  Napi::EscapableHandleScope scope(env);
+  Napi::Array dtdPaths = info[0].As<Napi::Array>();
+  Napi::Array errors = Napi::Array::New(env);
   xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value str(info[0]->ToString());
-  string txt (*str);
-  // Those options shoudl be send by the user, it enable/disbale errors, warnings ..
-  int options;
-  options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  if(libxml->docPtr != NULL){
-    xmlFreeDoc(libxml->docPtr);
-    libxml->docPtr = nullptr;
-  }
-  libxml->docPtr = xmlReadMemory(txt.c_str(), txt.length(), NULL, NULL, options);
-  xmlSetStructuredErrorFunc(NULL, NULL);
-
-  if(libxml->docPtr == NULL){
-    // We set property to libxml element only if notWellformed
-    info.Holder()->Set(Nan::New<v8::String>("wellformedErrors").ToLocalChecked(), errors);
-    info.GetReturnValue().Set(Nan::False());
-  }else{
-    info.GetReturnValue().Set(Nan::True());
-  }
-}
-
-NAN_METHOD(Libxml::getDtd){
-  Nan::HandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  assert(libxml);
-  xmlDtdPtr dtd = xmlGetIntSubset(libxml->docPtr);
-  if (!dtd) {
-    return info.GetReturnValue().Set(Nan::Null());
-  }
-  const char* name = (const char *)dtd->name;
-  const char* extId = (const char *)dtd->ExternalID;
-  const char* sysId = (const char *)dtd->SystemID;
-  v8::Local<v8::Object> dtdObj = Nan::New<v8::Object>();
-  v8::Local<v8::Value> nameValue = (v8::Local<v8::Value>)Nan::Null();
-  v8::Local<v8::Value> extValue = (v8::Local<v8::Value>)Nan::Null();
-  v8::Local<v8::Value> sysValue = (v8::Local<v8::Value>)Nan::Null();
-
-  if (name != NULL) {
-    nameValue = (v8::Local<v8::Value>)Nan::New<v8::String>(name, strlen(name)).ToLocalChecked();
-  }
-  if (extId != NULL) {
-    extValue = (v8::Local<v8::Value>)Nan::New<v8::String>(extId, strlen(extId)).ToLocalChecked();
-  }
-  if (sysId != NULL) {
-    sysValue = (v8::Local<v8::Value>)Nan::New<v8::String>(sysId, strlen(sysId)).ToLocalChecked();
-  }
-  // to get publicId or systemId it's the same ... http://xmlsoft.org/html/libxml-tree.html#xmlDtd
-  Nan::Set(dtdObj, Nan::New<v8::String>("name").ToLocalChecked(), nameValue);
-  Nan::Set(dtdObj, Nan::New<v8::String>("externalId").ToLocalChecked(), extValue);
-  Nan::Set(dtdObj, Nan::New<v8::String>("systemId").ToLocalChecked(), sysValue);
-  return info.GetReturnValue().Set(dtdObj);
-}
-
-NAN_METHOD(Libxml::loadDtds){
-  if (info.Length() < 1){
-    return Nan::ThrowTypeError("loadDtds requires at least 1 argument, an array of DTDs");
-  }
-  if(!info[0]->IsArray()){
-    return Nan::ThrowTypeError("loadDtds requires an array");
-  }
-  Nan::EscapableHandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  Local<Array> dtdsPathsLocal = Local<Array>::Cast(info[0]);
-  Local<Array> errors = Nan::New<Array>();
-  // disbale errors erreurs etc
-  //v8::Local<v8::Array> errorsDTD = Nan::New<v8::Array>();
-  xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
-  for (unsigned int i = 0; i < dtdsPathsLocal->Length(); i++){
-    if (Nan::Has(dtdsPathsLocal, i).FromJust() && Nan::Get(dtdsPathsLocal, i).ToLocalChecked()->IsString()) {
-      Local<String> value = Nan::Get(dtdsPathsLocal, i).ToLocalChecked()->ToString();
-      String::Utf8Value pathV8(value->ToString());
-      string pathStr (*pathV8);
-      const char* path (*pathV8);
-      xmlChar* pathDTDCasted = xmlCharStrdup(path);
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+  for (unsigned int i = 0; i < dtdPaths.Length(); i++){
+    //Skip elements silently which are not strings
+    if(dtdPaths.Get(i).IsString()) {
+      std::string dtdPath = dtdPaths.Get(i).ToString().Utf8Value();
+      xmlChar* pathDTDCasted = xmlCharStrdup(dtdPath.c_str());
       xmlDtdPtr dtd =  xmlParseDTD(NULL, pathDTDCasted);
-      if (dtd == NULL) {
-        //DTD is bad, we set error and not assign it + next
-        errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+      if (dtd == nullptr) {
+        //DTD is bad, we set error and not assign it
+        XmlSyntaxError::PushToArray(errors, dtdPath.c_str());
         continue;
       }
-      libxml->dtdsPaths.push_back(dtd);
+      this->dtdsPaths.push_back(dtd);
     }
   }
-  xmlSetStructuredErrorFunc(NULL, NULL);
+  xmlSetStructuredErrorFunc(nullptr, nullptr);
   // We set dtdsLoadedErrors property for js side
-  if(errors->Length()){
-    info.Holder()->Set(Nan::New<v8::String>("dtdsLoadedErrors").ToLocalChecked(), errors);
+  if(errors.Length()){
+    this->Value().Set("dtdsLoadedErrors", errors);
+  } else {
+    this->Value().Delete("dtdsLoadedErrors");
   }
+  return env.Undefined();
 }
 
-// NAN_METHOD(Libxml::loadDtdsFromString){
-//   if (info.Length() < 1){
-//     return Nan::ThrowTypeError("loadDtds requires at least 1 argument, an array of DTDs");
-//   }
-//   if(!info[0]->IsArray()){
-//     return Nan::ThrowTypeError("loadDtds requires an array");
-//   }
-//   Nan::EscapableHandleScope scope;
-//   Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-//   Local<Array> dtdsStrLocal = Local<Array>::Cast(info[0]);
-//   Local<Array> errors = Nan::New<Array>();
-//   int options;
-//   options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-//   // disbale errors erreurs etc
-//   //v8::Local<v8::Array> errorsDTD = Nan::New<v8::Array>();
-//   xmlResetLastError();
-//   xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-//             XmlSyntaxError::PushToArray);
-//   for (unsigned int i = 0; i < dtdsStrLocal->Length(); i++){
-//     if (Nan::Has(dtdsStrLocal, i).FromJust() && Nan::Get(dtdsStrLocal, i).ToLocalChecked()->IsString()) {
-//       Local<String> value = Nan::Get(dtdsStrLocal, i).ToLocalChecked()->ToString();
-//       String::Utf8Value strV8(value->ToString());
-//       string pathStr (*strV8);
-//       xmlDocPtr dtdDoc = xmlReadMemory(pathStr.c_str(),pathStr.length(),NULL,NULL,options);;
-//       if (dtdDoc == NULL) {
-//         //DTD is bad, we set error and not assign it + next
-//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
-//         continue;
-//       }
-//       // Parse DTD from memory
-//       xmlParserInputBufferPtr dtdBuf = xmlParserInputBufferCreateMem(pathStr.c_str(), pathStr.size(),
-//                                                                XML_CHAR_ENCODING_UTF8);
-//       if (!dtdBuf) {
-//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
-//         continue;
-//       }
-//       xmlDtdPtr pDtd = xmlIOParseDTD(NULL, dtdBuf, XML_CHAR_ENCODING_UTF8);
-//       if (pDtd == NULL) {
-//         xmlFreeDtd(pDtd);
-//         errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
-//         continue;
-//       }
-//       libxml->dtdsPaths.push_back(pDtd);
-//     }
-//   }
-//   xmlSetStructuredErrorFunc(NULL, NULL);
-//   // We set dtdsLoadedErrors property for js side
-//   if(errors->Length()){
-//     info.Holder()->Set(Nan::New<v8::String>("dtdsLoadedErrors").ToLocalChecked(), errors);
-//   }
-// }
-
-NAN_METHOD(Libxml::loadSchemas){
+Napi::Value Libxml::loadSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   if (info.Length() < 1){
-    return Nan::ThrowTypeError("loadSchemas requires at least 1 argument, an array of Schemas");
+     Napi::TypeError::New(env, "loadSchemas requires at least 1 argument, an array of Schemas").ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  if(!info[0]->IsArray()){
-    return Nan::ThrowTypeError("loadSchemas requires an array");
+  if(!info[0].IsArray()){
+    Napi::TypeError::New(env, "loadSchemas requires an array").ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  Nan::EscapableHandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  Local<Array> schemasPathsLocal = Local<Array>::Cast(info[0]);
-  Local<Array> errors = Nan::New<Array>();
-  // disbale errors erreurs etc
-  //v8::Local<v8::Array> errorsDTD = Nan::New<v8::Array>();
+  Napi::EscapableHandleScope scope(env);
+  Napi::Array schemasPathsLocal = info[0].As<Napi::Array>();
+  //set up error handlers
+  Napi::Array errors = Napi::Array::New(env);
   xmlResetLastError();
-  xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
-  for (unsigned int i = 0; i < schemasPathsLocal->Length(); i++){
-    if (Nan::Has(schemasPathsLocal, i).FromJust() && Nan::Get(schemasPathsLocal, i).ToLocalChecked()->IsString()) {
-      Local<String> value = Nan::Get(schemasPathsLocal, i).ToLocalChecked()->ToString();
-      String::Utf8Value pathV8(value->ToString());
-      string pathStr (*pathV8);
-      const char* path (*pathV8);
+  XmlSyntaxError::env = &env;
+  xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                          XmlSyntaxError::PushToArray);
+  for (unsigned int i = 0; i < schemasPathsLocal.Length(); i++){
+    // Handle value if string and drop it silently otherwise
+    if(schemasPathsLocal.Get(i).IsString()) {
+      Napi::String value = schemasPathsLocal.Get(i).As<Napi::String>();
+      string pathStr (value.Utf8Value());
+      const char* path (pathStr.c_str());
       xmlSchemaParserCtxtPtr pctxt;
       xmlSchemaPtr schema;
       // If cannot create Parse schema, just continue
       if ((pctxt = xmlSchemaNewParserCtxt(path)) == NULL) {
-        errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+        XmlSyntaxError::PushToArray(errors, path);
         continue;
       }
-      // Chargement du contenu du XML Schema
+      // Loading XML Schema content
       schema = xmlSchemaParse(pctxt);
       xmlSchemaFreeParserCtxt(pctxt);
-      if (schema == NULL) {
-        errors->Set(i, Nan::New<String>(pathStr.c_str()).ToLocalChecked());
+      if (schema == nullptr) {
+        XmlSyntaxError::PushToArray(errors, path);
         continue;
       }
-      libxml->schemasPaths.push_back(schema);
+      this->schemasPaths.push_back(schema);
     }
   }
   xmlSetStructuredErrorFunc(NULL, NULL);
   // We set dtdLoadedErrors property for js side
-  if(errors->Length()){
-    info.Holder()->Set(Nan::New<v8::String>("schemasLoadedErrors").ToLocalChecked(), errors);
+  if(errors.Length()){
+    this->Value().Set("schemasLoadedErrors", errors);
+  } else {
+    this->Value().Delete("schemasLoadedErrors");
   }
+  return env.Undefined();
 }
 
-NAN_METHOD(Libxml::validateAgainstDtds){
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  if(libxml->dtdsPaths.empty()){
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+  if(this->dtdsPaths.empty()){
+    return env.Null();
   }
 
-  if(int newMaxNbError = info[0]->IntegerValue()){
-    XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
+  // if first param is number then apply it. If not then silently drop it 
+  if(info.Length() > 0 && info[0].IsNumber()) {
+    XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber());
   }
 
-  //Setting contexte of validation 
-  const char* dtdValidationErrorsPath;
+  //Setting context of validation 
   bool oneOfTheDtdValidate = false;
   string dtdValidateName;
 
 
   //If length 0, return null; to implement
-  Local<Object> errorsValidations = Nan::New<Object>();
+  Napi::Object errorsValidations = Napi::Object::New(env);
 
-  for (vector<xmlDtdPtr>::iterator dtd = libxml->dtdsPaths.begin(); dtd != libxml->dtdsPaths.end() ; ++dtd){
+  for (vector<xmlDtdPtr>::iterator dtd = this->dtdsPaths.begin(); dtd != this->dtdsPaths.end() ; ++dtd){
     const char* dtdName = (const char *)(*dtd)->SystemID;
-    //Local<Array> errors = New<v8::Array>(3);
-    v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+
+    //set up error handling
+    Napi::Array errors = Napi::Array::New(env);
     xmlResetLastError();
-    xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-              XmlSyntaxError::PushToArray);
-    Local<String> SystemIDString = Nan::New<String>(dtdName).ToLocalChecked();
-    // Création du contexte de validation
+    XmlSyntaxError::env = &env;
+    xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+    
+    Napi::String SystemIDString = Napi::String::New(env, dtdName);
+    // Context creation for validation
     xmlValidCtxtPtr vctxt;
-    //vctxt = xmlNewValidCtxt();
-    if ((vctxt = xmlNewValidCtxt()) == NULL) {
+    if ((vctxt = xmlNewValidCtxt()) == nullptr) {
       continue;
     }
     //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
-    vctxt->userData = (void *) Libxml::errorsHandler;
-    vctxt->error = (xmlValidityErrorFunc) Libxml::errorsHandler;
-    vctxt->warning = (xmlValidityWarningFunc) Libxml::errorsHandler;
+    //xmlSetStructuredErrorFunc(vctxt, nullptr);
+
+    vctxt->userData = nullptr;
+    vctxt->error = nullptr;
+    vctxt->warning = nullptr;
+
     // Validation
-    int result = xmlValidateDtd(vctxt, libxml->docPtr, *dtd);
-    // Libération des erreurs etc
-    xmlSetStructuredErrorFunc(NULL, NULL);
+    int result = xmlValidateDtd(vctxt, this->docPtr, *dtd);
+
+    // drop error handling function and free context
+    xmlSetStructuredErrorFunc(nullptr, nullptr);
     xmlFreeValidCtxt(vctxt);
+    //If validation was successfull than break the loop
     if(result != 0){
       oneOfTheDtdValidate = true;
       dtdValidateName = dtdName;
       break;
     }
-    errorsValidations->Set(SystemIDString, errors);
-    dtdValidationErrorsPath = dtdName;
+    // If validation failed add result to error object
+    errorsValidations.Set(SystemIDString, errors);
   }
   if(oneOfTheDtdValidate){
+    this->Value().Delete("validationDtdErrors");
     if(dtdValidateName.length()){
-      info.GetReturnValue().Set(Nan::New<v8::String>(dtdValidateName).ToLocalChecked());
+      return Napi::String::New(env, dtdValidateName);
     }else{
-      info.GetReturnValue().Set(Nan::True());
+      return Napi::Boolean::New(env, true);
     }
   }else{
-    info.Holder()->Set(Nan::New<v8::String>("validationDtdErrors").ToLocalChecked(), errorsValidations);
-    info.GetReturnValue().Set(Nan::False());
+    this->Value().Set("validationDtdErrors", errorsValidations);
+    return Napi::Boolean::New(env, false);
   }
 }
 
-NAN_METHOD(Libxml::validateAgainstSchemas){
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  if(libxml->schemasPaths.empty()){
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+  if(this->schemasPaths.empty()){
+    return env.Null();;
   }
 
-  if(int newMaxNbError = info[0]->IntegerValue()){
-    XmlSyntaxError::ChangeMaxNumberOfError(newMaxNbError);
+  if(info[0].IsNumber()){
+    XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber().Int32Value());
   }
-  //Setting contexte of validation 
+  //Setting context of validation 
   const char* schemaValidationErrorsPath;
   bool oneOfTheSchemaValidate = false;
   string schemaValidateName;
 
 
   //If length 0, return null; to implement
-  Local<Object> errorsValidations = Nan::New<Object>();
+  //Local<Object> errorsValidations = Nan::New<Object>();
+  Napi::Object errorsValidations = Napi::Object::New(env);
 
-  for (vector<xmlSchemaPtr>::iterator xsd = libxml->schemasPaths.begin(); xsd != libxml->schemasPaths.end() ; ++xsd){
-    v8::Local<v8::Array> errors = Nan::New<v8::Array>();
+  for (vector<xmlSchemaPtr>::iterator xsd = this->schemasPaths.begin(); xsd != this->schemasPaths.end() ; ++xsd){
+    //set up error handling
+    Napi::Array errors = Napi::Array::New(env);
     xmlResetLastError();
-    xmlSetStructuredErrorFunc(reinterpret_cast<void *>(&errors),
-            XmlSyntaxError::PushToArray);
+    XmlSyntaxError::env = &env;
+    xmlSetStructuredErrorFunc(reinterpret_cast<void*>(&errors),
+                            XmlSyntaxError::PushToArray);
+
     const char* xsdName = (const char *)(*xsd)->doc->URL;
-    Local<String> urlSchema = Nan::New<String>(xsdName).ToLocalChecked();
-    // Création du contexte de validation
+    //Local<String> urlSchema = Nan::New<String>(xsdName).ToLocalChecked();
+    Napi::String urlSchema = Napi::String::New(env, xsdName);
+    // Creating the validation context
     xmlSchemaValidCtxtPtr vctxt;
-    if ((vctxt = xmlSchemaNewValidCtxt(*xsd)) == NULL) {
+    if ((vctxt = xmlSchemaNewValidCtxt(*xsd)) == nullptr) {
       continue;
     }
     //Instead we could set this to disable output : xmlSetStructuredErrorFunc(vctxt,errorsHandler);
-    xmlSchemaSetValidErrors(vctxt, (xmlSchemaValidityErrorFunc) Libxml::errorsHandler, (xmlSchemaValidityWarningFunc) Libxml::errorsHandler, (void *) Libxml::errorsHandler);
-    int result = xmlSchemaValidateDoc(vctxt, libxml->docPtr);
-    // Libération des erreurs etc
-    xmlSetStructuredErrorFunc(NULL, NULL);
+    // xmlSchemaSetValidErrors(vctxt, (xmlSchemaValidityErrorFunc) Libxml::errorsHandler, (xmlSchemaValidityWarningFunc) Libxml::errorsHandler, (void *) Libxml::errorsHandler);
+    xmlSchemaSetValidErrors(vctxt, nullptr, nullptr, nullptr);
+    int result = xmlSchemaValidateDoc(vctxt, this->docPtr);
+    // Stop listening for errors
+    xmlSetStructuredErrorFunc(nullptr, nullptr);
     xmlSchemaFreeValidCtxt(vctxt);
     if(result == 0){
       oneOfTheSchemaValidate = true;
       schemaValidateName = xsdName;
       break;
     }
-    errorsValidations->Set(urlSchema, errors);
+    errorsValidations.Set(urlSchema, errors);
     schemaValidationErrorsPath = xsdName;
   }
   if(oneOfTheSchemaValidate){
+    this->Value().Delete("validationSchemaErrors");
     if(schemaValidateName.length()){
-      info.GetReturnValue().Set(Nan::New<v8::String>(schemaValidateName).ToLocalChecked());
+      //info.GetReturnValue().Set(Nan::New<v8::String>(schemaValidateName).ToLocalChecked());
+      return Napi::String::New(env, schemaValidateName);
     }else{
-      info.GetReturnValue().Set(Nan::True());
+      //info.GetReturnValue().Set(Nan::True());
+      return Napi::Boolean::New(env, true);
     }
   }else{
-    info.Holder()->Set(Nan::New<v8::String>("validationSchemaErrors").ToLocalChecked(), errorsValidations);
-    info.GetReturnValue().Set(Nan::False());
+    // info.Holder()->Set(Nan::New<v8::String>("validationSchemaErrors").ToLocalChecked(), errorsValidations);
+    // info.GetReturnValue().Set(Nan::False());
+    this->Value().Set("validationSchemaErrors", errorsValidations);
+    return Napi::Boolean::New(env, false);
   }
 }
 
-
-NAN_METHOD(Libxml::xpathSelect){
+Napi::Value Libxml::xpathSelect(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   if (info.Length() < 1){
-    return Nan::ThrowTypeError("xpathSelect requires at least 1 argument");
+    Napi::TypeError::New(env, "xpathSelect requires at least 1 argument").ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  Nan::EscapableHandleScope scope;
-  v8::Local<v8::Value> res;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  String::Utf8Value val(info[0]->ToString());
-  const char* xpathToGet(*val);
+  Napi::EscapableHandleScope scope(env);
+  Napi::Value res;
+  Napi::String val = info[0].ToString();
+  //Need to keep string in memory and get its const char* casted version for libxml2
+  std::string xpathStr = val.Utf8Value();
+  const char* xpathToGet(xpathStr.c_str());
   xmlChar * xpathExpr = xmlCharStrdup(xpathToGet);
   xmlXPathContextPtr xpathCtx;
   xmlXPathObjectPtr xpathObj;
   /* Create xpath evaluation context */
-  xpathCtx = xmlXPathNewContext(libxml->docPtr);
-  if(xpathCtx == NULL) {
-    return Nan::ThrowTypeError("Error: unable to create new XPath context");
+  xpathCtx = xmlXPathNewContext(this->docPtr);
+  if(xpathCtx == nullptr) {
+    Napi::Error::New(env, "Error: unable to create new XPath context").ThrowAsJavaScriptException();
+    return env.Undefined();
   }
   /* Evaluate xpath expression */
   xpathObj = xmlXPathEvalExpression(xpathExpr, xpathCtx);
-  if(xpathObj == NULL) {
+  if(xpathObj == nullptr) {
     xmlXPathFreeContext(xpathCtx);
-    info.GetReturnValue().Set(Nan::False());
+    return Napi::Boolean::New(env, false);
   }
   else if(xpathObj) {
     switch (xpathObj->type) {
     case XPATH_BOOLEAN:
-      res = Nan::New<v8::Boolean>(xpathObj->boolval);
+      res = Napi::Boolean::New(env, xpathObj->boolval);
       break;
     case XPATH_NUMBER:
-      res = Nan::New<v8::Number>(xpathObj->floatval);
+      res = Napi::Number::New(env, xpathObj->floatval);
       break;
     case XPATH_STRING:
-      res = Nan::New<v8::String>((const char *)xpathObj->stringval,
-        xmlStrlen(xpathObj->stringval)).ToLocalChecked();
+      res = Napi::String::New(env, (const char *)xpathObj->stringval);
       break;
     default:
-      res = Nan::Null();
+      res = env.Null();
       break;
     }
   }
   xmlXPathFreeObject(xpathObj);
   xmlXPathFreeContext(xpathCtx);
-  return info.GetReturnValue().Set(scope.Escape(res));
+  return scope.Escape(res);
 }
 
-NAN_METHOD(Libxml::freeXml){
-  Nan::HandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  // Delete Javascript property
-  bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("wellformedErrors").ToLocalChecked()).FromMaybe(false);
-  // If doc is already null, just do nothing and only available on manual mod
-  if(libxml->docPtr == NULL){
-    return;
+Napi::Value Libxml::getDtd(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  // Get DTD using libxml2
+  xmlDtdPtr dtd = xmlGetIntSubset(this->docPtr);
+  //return null if no valid xml loaded so far
+  if (!dtd) {
+    return env.Null();
   }
-  // Force clear memory DTD loaded
-  xmlFreeDoc(libxml->docPtr);
-  libxml->docPtr = NULL;
-};
 
-NAN_METHOD(Libxml::freeDtds){
-  Nan::HandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+  //Set up return object.
+  const char* name = (const char *)dtd->name;
+  const char* extId = (const char *)dtd->ExternalID;
+  const char* sysId = (const char *)dtd->SystemID;
+  Napi::Object dtdObject = Napi::Object::New(env);
+  Napi::Value nameValue = name
+                            ? Napi::String::New(env, name)
+                            : env.Null();
+  Napi::Value extValue = extId
+                            ? Napi::String::New(env, extId)
+                            : env.Null();
+  Napi::Value sysValue = sysId
+                            ? Napi::String::New(env, sysId)
+                            : env.Null();
+
+  // to get publicId or systemId it's the same ... http://xmlsoft.org/html/libxml-tree.html#xmlDtd
+  dtdObject.Set("name", nameValue);
+  dtdObject.Set("externalId", extValue);
+  dtdObject.Set("systemId", sysValue);
+  return dtdObject;
+}
+
+void Libxml::freeXml(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
   // Delete Javascript property
-  bool deletedLoaded = Nan::Delete(info.Holder(), Nan::New<v8::String>("dtdsLoadedErrors").ToLocalChecked()).FromMaybe(false);
-  bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationDtdErrors").ToLocalChecked()).FromMaybe(false);
-  // If dtds is already empty, just stop here
-  if(libxml->dtdsPaths.empty()){
+  this->Value().Delete("wellformedErrors");
+  // If doc is already null, just do nothing and only available on manual mod
+  if(this->docPtr == nullptr){
     return;
   }
-  for (vector<xmlDtdPtr>::iterator dtd = libxml->dtdsPaths.begin(); dtd != libxml->dtdsPaths.end() ; ++dtd){
-    if(*dtd != NULL){
+  // Force clear the memory loaded for XML
+  xmlFreeDoc(this->docPtr);
+  this->docPtr = nullptr;
+}
+
+void Libxml::freeDtds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  // Delete Javascript property
+  this->Value().Delete("dtdsLoadedErrors");
+  this->Value().Delete("validationDtdErrors");
+  // If dtds is already empty, just stop here
+  if(this->dtdsPaths.empty()){
+    return;
+  }
+  for (vector<xmlDtdPtr>::iterator dtd = this->dtdsPaths.begin(); dtd != this->dtdsPaths.end() ; ++dtd){
+    if(*dtd != nullptr){
       // Force clear memory DTD loaded
       xmlFreeDtd(*dtd);
       *dtd = nullptr;
     }
   }
   // clear the vector of dtds
-  libxml->dtdsPaths.clear();
+  this->dtdsPaths.clear();
+  return;
 }
 
-NAN_METHOD(Libxml::freeSchemas){
-  Nan::HandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
+void Libxml::freeSchemas(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::HandleScope scope(env);
+  //Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   // Delete Javascript property
-  bool deletedLoaded = Nan::Delete(info.Holder(), Nan::New<v8::String>("schemasLoadedErrors").ToLocalChecked()).FromMaybe(false);
-  bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationSchemasErrors").ToLocalChecked()).FromMaybe(false);
+  // bool deletedLoaded = Nan::Delete(info.Holder(), Nan::New<v8::String>("schemasLoadedErrors").ToLocalChecked()).FromMaybe(false);
+  // bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationSchemasErrors").ToLocalChecked()).FromMaybe(false);
+  this->Value().Delete("schemasLoadedErrors");
+  this->Value().Delete("validationSchemasErrors");
   // If dtds is already empty, just stop here
-  if(libxml->schemasPaths.empty()){
+  if(this->schemasPaths.empty()){
     return;
   }
-  for (vector<xmlSchemaPtr>::iterator xsd = libxml->schemasPaths.begin(); xsd != libxml->schemasPaths.end() ; ++xsd){
-    if(*xsd != NULL){
+  for (vector<xmlSchemaPtr>::iterator xsd = this->schemasPaths.begin(); xsd != this->schemasPaths.end() ; ++xsd){
+    if(*xsd != nullptr){
       // Force clear memory xsd loaded
       xmlSchemaFree(*xsd);
       *xsd = nullptr;
     }
   }
   // clear the vector of dtds
-  libxml->schemasPaths.clear();
+  this->schemasPaths.clear();
+//
 }
 
-NAN_METHOD(Libxml::clearAll){
-  Nan::HandleScope scope;
-  Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
-  // Attention this function clear all the libxml2 memory for all threads!
+void Libxml::clearAll(const Napi::CallbackInfo& info) {
+  this->freeXml(info);
+  this->freeDtds(info);
+  this->freeSchemas(info);
   xmlCleanupParser();
 }
 
-void InitLibxml(v8::Local<v8::Object> exports) { Libxml::Init(exports); }
+// Initialize native add-on
+Napi::Object Init(Napi::Env env, Napi::Object exports)
+{
+  Libxml::Init(env, exports);
+  return exports;
+}
 
-NODE_MODULE(libxml, InitLibxml);
+// Register and initialize native add-on
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)

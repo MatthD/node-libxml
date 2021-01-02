@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.twig": "twig",
+    "ios": "cpp",
+    "vector": "cpp"
+  }
+}
