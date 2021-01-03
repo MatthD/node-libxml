@@ -1,7 +1,7 @@
 {
   'targets': [
     {
-      'target_name': 'xml',
+      "target_name": "<(module_name)",
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'xcode_settings': { 'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
@@ -11,12 +11,10 @@
       'msvs_settings': {
         'VCCLCompilerTool': { 'ExceptionHandling': 1 },
       },
-      'product_extension': 'node',
-      'type': 'shared_library',
+      'product_dir': '<(module_path)',
       'include_dirs': [
         '<!@(node -p "require(\'node-addon-api\').include")',
-        'vendor/libxml/include',
-        "<!@(node -p \"require('node-addon-api').include\")",
+        './vendor/libxml/include',
       ],
       'cflags': [ '-Wall' ],
       'cflags!': [ '-fno-exceptions' ],
