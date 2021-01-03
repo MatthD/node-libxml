@@ -1,2 +1,3 @@
-const Libxml = require('bindings')('xml').Libxml;
+const binding = require('node-gyp-build')(__dirname)
+const Libxml = binding.Libxml;
 module.exports = Libxml;
