@@ -1,6 +1,6 @@
 {
   "name": "node-libxml",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
   "main": "index.js",
   "repository": {
@@ -36,7 +36,15 @@
       7
     ]
   },
-  "files": ["prebuilds/**/*", "test/**/*", "binding.gyp", "index.js", "libxml*.cpp", "libxml*.h", "Readme.md"],
+  "files": [
+    "prebuilds/**/*",
+    "test/**/*",
+    "binding.gyp",
+    "index.js",
+    "libxml*.cpp",
+    "libxml*.h",
+    "Readme.md"
+  ],
   "gypfile": true,
   "devDependencies": {
     "node-pre-gyp": "0.17.0"
