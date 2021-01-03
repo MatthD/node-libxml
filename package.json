@@ -36,6 +36,7 @@
       7
     ]
   },
+  "files": ["prebuilds/**/*", "test/**/*", "binding.gyp", "index.js", "libxml*.cpp", "libxml*.h", "Readme.md"],
   "gypfile": true,
   "devDependencies": {
     "node-pre-gyp": "0.17.0"
