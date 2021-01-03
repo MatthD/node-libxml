@@ -15,9 +15,12 @@ It can perform:
 
 Node-Libxml has nos any dependencies, it's fully bundled, so you can just use it as it comes :)
 
-Works on : Linux, Osx & Windows (no 32bits, just 64 bits) 
+Works on : Linux, Osx & Windows (no 32bits, **just 64 bits**) 
 
-Node: Already built for all LTS node (4,6,8,10)
+For old node.js versions please use verison < 4.0.0 Already for old LTS node (4,6,8) `npm install node-libxml@3.2.5`;
+For new node.js versions (10,12,14) we are using n-api so please install `npm install node-libxml@4.1.0` (4.0.0 is not working) 
+
+Important: for windows  
 
 ## Why use it 
 Node-libxml has been thought differently than [libxmljs](https://github.com/libxmljs/libxmljs); whereas libxmljs can be use in commun uses, you can use node-libxml if:
