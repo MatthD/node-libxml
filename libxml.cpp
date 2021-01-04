@@ -69,9 +69,9 @@ Napi::Value Libxml::loadXml(const Napi::CallbackInfo &info)
   Napi::String path = info[0].As<Napi::String>();
   this->path = path.ToString();
   const char *pathToRead = this->path.c_str();
-  this->docPtr = xmlReadFile(pathToRead, NULL, options);
-  xmlSetStructuredErrorFunc(NULL, NULL);
-  if (this->docPtr == NULL)
+  this->docPtr = xmlReadFile(pathToRead, nullptr, options);
+  xmlSetStructuredErrorFunc(nullptr, nullptr);
+  if (this->docPtr == nullptr)
   {
     this->Value().Set("wellformedErrors", errors);
     return Napi::Boolean::New(env, false);
@@ -97,7 +97,7 @@ Napi::Value Libxml::loadXmlFromString(const Napi::CallbackInfo& info) {
   
   // Those options should be send by the user, it enable/disbale errors, warnings ..
   int options = (XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NONET);
-  if(this->docPtr != NULL){
+  if(this->docPtr != nullptr){
     xmlFreeDoc(this->docPtr);
     this->docPtr = nullptr;
   }
@@ -140,7 +140,7 @@ Napi::Value Libxml::loadDtds(const Napi::CallbackInfo& info) {
     if(dtdPaths.Get(i).IsString()) {
       std::string dtdPath = dtdPaths.Get(i).ToString().Utf8Value();
       xmlChar* pathDTDCasted = xmlCharStrdup(dtdPath.c_str());
-      xmlDtdPtr dtd =  xmlParseDTD(NULL, pathDTDCasted);
+      xmlDtdPtr dtd =  xmlParseDTD(nullptr, pathDTDCasted);
       if (dtd == nullptr) {
         //DTD is bad, we set error and not assign it
         XmlSyntaxError::PushToArray(errors, dtdPath.c_str());
@@ -186,7 +186,7 @@ Napi::Value Libxml::loadSchemas(const Napi::CallbackInfo& info) {
       xmlSchemaParserCtxtPtr pctxt;
       xmlSchemaPtr schema;
       // If cannot create Parse schema, just continue
-      if ((pctxt = xmlSchemaNewParserCtxt(path)) == NULL) {
+      if ((pctxt = xmlSchemaNewParserCtxt(path)) == nullptr) {
         XmlSyntaxError::PushToArray(errors, path);
         continue;
       }
@@ -200,7 +200,7 @@ Napi::Value Libxml::loadSchemas(const Napi::CallbackInfo& info) {
       this->schemasPaths.push_back(schema);
     }
   }
-  xmlSetStructuredErrorFunc(NULL, NULL);
+  xmlSetStructuredErrorFunc(nullptr, nullptr);
   // We set dtdLoadedErrors property for js side
   if(errors.Length()){
     this->Value().Set("schemasLoadedErrors", errors);
