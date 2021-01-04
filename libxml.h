@@ -51,6 +51,10 @@ private:
   void freeDtds(const Napi::CallbackInfo& info);
   void freeSchemas(const Napi::CallbackInfo& info);
   void clearAll(const Napi::CallbackInfo& info);
+
+  // max error number util functions
+  Napi::Value getMaxErrorNumber(const Napi::CallbackInfo& info);
+  Napi::Value setMaxErrorNumber(const Napi::CallbackInfo& info);
 };
 
 #endif

@@ -159,6 +159,23 @@ declare class Libxml {
      */
     clearAll(): void;
 
+    /**
+     * @returns The maximum number of error which will be stores
+     */
+    getMaxErrorNumber(): number;
+
+    /**
+     * Sets the maximum number of error which wil be stored.
+     * 
+     * The default value is 100
+     * 
+     * @param max The desired max number
+     * @returns The actual number set. 
+     * In case if it was not a number or if it is too big maybe you got other result as expected.
+     * If param was not a number or non positive than max number will not change.
+     */
+    setMaxErrorNumber(max: number): number;
+
     wellformedErrors?: (XmlError)[];
     dtdsLoadedErrors?: (string | XmlError)[];
     schemasLoadedErrors?: (string | XmlError)[];
