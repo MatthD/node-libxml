@@ -142,7 +142,7 @@ describe('Node-Libxml', function () {
     expect(nbElementsInXpath).to.equal(4);
     libxml.freeXml();
   });
-  // // // ABOVE IS ALL THE SAME WITH MEMORY MANUAL MANADGEMENT
+  // // // ABOVE IS ALL THE SAME WITH MEMORY MANUAL MANAGEMENT
   it('should free XML memory & infos when asked in manual mod On not wellformed xml', function () {
     let libxml = new Libxml(true);
     let wellformed = libxml.loadXml('test/data/test-not-wellformed.xml');
