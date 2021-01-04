@@ -65,13 +65,6 @@ declare class Libxml {
     /**
      * Validate loaded XML against loaded DTDs
      * @param maxErrorNumber The maximum number of errors that should collected and returned on a dtd per basis.
-     * * WARNING The maximum number is set globally in this case so any subsequent call of these function will use this
-     * * * loadXml
-     * * * loadXmlFromString
-     * * * loadDtds
-     * * * loadSchemas
-     * * * validateAgainstDtds (if no param given)
-     * * * validateAgainstSchemas (if no param given)
      * @returns
      * * ```null``` if not any DTDs loaded correctly at all. (No load at all or all of it was wrong)
      * * A string which is the name of the DTD if it has any name
@@ -88,13 +81,6 @@ declare class Libxml {
     /**
      * Validate loaded XML against loaded schemas
      * @param maxErrorNumber The maximum number of errors that should collected and returned on a schema per basis.
-     * * WARNING The maximum number is set globally in this case so any subsequent call of these function will use this
-     * * * loadXml
-     * * * loadXmlFromString
-     * * * loadDtds
-     * * * loadSchemas
-     * * * validateAgainstDtds (if no param given)
-     * * * validateAgainstSchemas (if no param given)
      * @returns
      * * ```null``` if not any schemas loaded correctly at all. (No load at all or all of it was wrong)
      * * A string which is the name of the schema if it has any name
