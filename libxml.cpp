@@ -218,6 +218,7 @@ Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
   }
 
   // if first param is number then apply it. If not then silently drop it 
+  MaxErrorNumberRestorer maxNumberRestorer;
   if(info.Length() > 0 && info[0].IsNumber()) {
     XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber());
   }
@@ -285,9 +286,10 @@ Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   if(this->schemasPaths.empty()){
-    return env.Null();;
+    return env.Null();
   }
 
+  MaxErrorNumberRestorer maxNumberRestorer;
   if(info[0].IsNumber()){
     XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber().Int32Value());
   }

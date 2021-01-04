@@ -12,6 +12,7 @@ class XmlSyntaxError
 public:
   static Napi::Env* env;
   static void ChangeMaxNumberOfError(int max);
+  static uint32_t GetMaxNumberOfError();
 
   // push xmlError onto Napi::Array
   static void PushToArray(void *errs, xmlError *error);
@@ -19,6 +20,16 @@ public:
 
   // create a Napi object for the syntax eror
   static Napi::Value BuildSyntaxError(xmlError *error, Napi::Env env);
+};
+
+class MaxErrorNumberRestorer {
+public:
+  MaxErrorNumberRestorer();
+  ~MaxErrorNumberRestorer();
+private:
+  uint32_t max;
+  MaxErrorNumberRestorer(MaxErrorNumberRestorer const &) = delete;
+  void operator=(MaxErrorNumberRestorer const &) = delete;
 };
 
 // LIBXML_SYNTAX_ERROR
