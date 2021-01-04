@@ -298,7 +298,6 @@ Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
 
 
   //If length 0, return null; to implement
-  //Local<Object> errorsValidations = Nan::New<Object>();
   Napi::Object errorsValidations = Napi::Object::New(env);
 
   for (vector<xmlSchemaPtr>::iterator xsd = this->schemasPaths.begin(); xsd != this->schemasPaths.end() ; ++xsd){
@@ -310,7 +309,6 @@ Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
                             XmlSyntaxError::PushToArray);
 
     const char* xsdName = (const char *)(*xsd)->doc->URL;
-    //Local<String> urlSchema = Nan::New<String>(xsdName).ToLocalChecked();
     Napi::String urlSchema = Napi::String::New(env, xsdName);
     // Creating the validation context
     xmlSchemaValidCtxtPtr vctxt;
@@ -335,15 +333,11 @@ Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
   if(oneOfTheSchemaValidate){
     this->Value().Delete("validationSchemaErrors");
     if(schemaValidateName.length()){
-      //info.GetReturnValue().Set(Nan::New<v8::String>(schemaValidateName).ToLocalChecked());
       return Napi::String::New(env, schemaValidateName);
     }else{
-      //info.GetReturnValue().Set(Nan::True());
       return Napi::Boolean::New(env, true);
     }
   }else{
-    // info.Holder()->Set(Nan::New<v8::String>("validationSchemaErrors").ToLocalChecked(), errorsValidations);
-    // info.GetReturnValue().Set(Nan::False());
     this->Value().Set("validationSchemaErrors", errorsValidations);
     return Napi::Boolean::New(env, false);
   }
@@ -468,10 +462,7 @@ void Libxml::freeDtds(const Napi::CallbackInfo& info) {
 void Libxml::freeSchemas(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   Napi::HandleScope scope(env);
-  //Libxml* libxml = Nan::ObjectWrap::Unwrap<Libxml>(info.Holder());
   // Delete Javascript property
-  // bool deletedLoaded = Nan::Delete(info.Holder(), Nan::New<v8::String>("schemasLoadedErrors").ToLocalChecked()).FromMaybe(false);
-  // bool deleted = Nan::Delete(info.Holder(), Nan::New<v8::String>("validationSchemasErrors").ToLocalChecked()).FromMaybe(false);
   this->Value().Delete("schemasLoadedErrors");
   this->Value().Delete("validationSchemasErrors");
   // If dtds is already empty, just stop here
