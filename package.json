@@ -26,11 +26,14 @@
   "files": [
     "prebuilds/**/*",
     "test/**/*",
+    "vendor/**/*",
     "binding.gyp",
-    "index.js",
+    "*.ts",
+    "*.js",
     "libxml*.cpp",
     "libxml*.h",
-    "Readme.md"
+    "Readme.md",
+    "package.json"
   ],
   "gypfile": true,
   "devDependencies": {
