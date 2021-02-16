@@ -51,6 +51,10 @@ void XmlSyntaxError::ChangeMaxNumberOfError(int max)
   XmlSyntaxError::maxError = max;
 }
 
+uint32_t XmlSyntaxError::GetMaxNumberOfError() {
+  return XmlSyntaxError::maxError;
+}
+
 void XmlSyntaxError::PushToArray(void *errs, xmlError *error)
 {
   Napi::Array errors = *reinterpret_cast<Napi::Array *>(errs);
@@ -70,4 +74,10 @@ void XmlSyntaxError::PushToArray(Napi::Array& errors, const char* errorMessage)
   }
   Napi::String messageToPush = Napi::String::New(*XmlSyntaxError::env, errorMessage);
   errors.Set(errors.Length(), messageToPush);
+}
+
+MaxErrorNumberRestorer::MaxErrorNumberRestorer(): max(XmlSyntaxError::GetMaxNumberOfError()) { }
+
+MaxErrorNumberRestorer::~MaxErrorNumberRestorer() {
+  XmlSyntaxError::ChangeMaxNumberOfError(max);
 }

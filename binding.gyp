@@ -27,9 +27,6 @@
         'MACOSX_DEPLOYMENT_TARGET': '10.7',
         'OTHER_CFLAGS': [ '-Wall' ]
       },
-      'defines': [
-        'NAPI_VERSION=<(napi_build_version)',
-      ],
       'sources': [
         'libxml.cpp',
         'libxml-syntax-error.cpp',

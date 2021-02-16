@@ -23,7 +23,9 @@ Napi::Object Libxml::Init(Napi::Env env, Napi::Object exports)
     InstanceMethod("freeXml", &Libxml::freeXml),
     InstanceMethod("freeDtds", &Libxml::freeDtds),
     InstanceMethod("freeSchemas", &Libxml::freeSchemas),
-    InstanceMethod("clearAll", &Libxml::clearAll)
+    InstanceMethod("clearAll", &Libxml::clearAll),
+    InstanceMethod("getMaxErrorNumber", &Libxml::getMaxErrorNumber),
+    InstanceMethod("setMaxErrorNumber", &Libxml::setMaxErrorNumber),
     });
 
   // Create a peristent reference to the class constructor. This will allow
@@ -218,6 +220,7 @@ Napi::Value Libxml::validateAgainstDtds(const Napi::CallbackInfo& info) {
   }
 
   // if first param is number then apply it. If not then silently drop it 
+  MaxErrorNumberRestorer maxNumberRestorer;
   if(info.Length() > 0 && info[0].IsNumber()) {
     XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber());
   }
@@ -285,9 +288,10 @@ Napi::Value Libxml::validateAgainstSchemas(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   if(this->schemasPaths.empty()){
-    return env.Null();;
+    return env.Null();
   }
 
+  MaxErrorNumberRestorer maxNumberRestorer;
   if(info[0].IsNumber()){
     XmlSyntaxError::ChangeMaxNumberOfError(info[0].ToNumber().Int32Value());
   }
@@ -486,6 +490,20 @@ void Libxml::clearAll(const Napi::CallbackInfo& info) {
   this->freeDtds(info);
   this->freeSchemas(info);
   xmlCleanupParser();
+}
+
+Napi::Value Libxml::getMaxErrorNumber(const Napi::CallbackInfo& info) {
+  return Napi::Number::New(info.Env(), XmlSyntaxError::GetMaxNumberOfError());
+}
+
+Napi::Value Libxml::setMaxErrorNumber(const Napi::CallbackInfo& info) {
+  if(info.Length() && info[0].IsNumber()) {
+    Napi::Number rawJsNumber = info[0].As<Napi::Number>();
+    if(rawJsNumber.DoubleValue() >= 0) {
+      XmlSyntaxError::ChangeMaxNumberOfError(rawJsNumber.Uint32Value());
+    }
+  }
+  return Napi::Number::New(info.Env(), XmlSyntaxError::GetMaxNumberOfError());
 }
 
 // Initialize native add-on
