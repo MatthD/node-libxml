@@ -1,4 +1,4 @@
-export enum XmlErrorLevel{
+declare enum XmlErrorLevel {
     /* No error */
     XML_ERR_NONE = 0,
     /* A simple warning */
@@ -9,7 +9,7 @@ export enum XmlErrorLevel{
     XML_ERR_FATAL = 3
 }
 
-export interface XmlError {
+interface XmlError {
     message: string;
     level: XmlErrorLevel;
     column: number;
@@ -18,7 +18,7 @@ export interface XmlError {
     int1: number;
 }
 
-export interface XmlDtdResult {
+interface XmlDtdResult {
     name: string;
     externalId: string;
     systemId: string;
