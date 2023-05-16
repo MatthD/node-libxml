@@ -2,6 +2,8 @@
   "files.associations": {
     "*.twig": "twig",
     "ios": "cpp",
-    "vector": "cpp"
-  }
+    "vector": "cpp",
+    "iostream": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
