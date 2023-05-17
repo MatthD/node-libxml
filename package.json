@@ -10,20 +10,20 @@
   "scripts": {
     "test": "jest",
     "install": "node-gyp-build",
-    "build": "prebuildify --napi -t 14.12.0"
+    "build": "prebuildify --napi --tag-uv --tag-armv --strip",
+    "build-mac": "prebuildify --napi --debug --strip --platform='darwin'",
+    "build-linux": "prebuildify --napi --debug --strip --platform='linux' ",
+    "build-windows": "prebuildify --napi --debug --strip --platform='win32' "
   },
   "author": "MatthD",
   "license": "MIT",
   "dependencies": {
     "bindings": "^1.5.0",
-    "chai": "^4.1.2",
-    "mocha": "^4.0.1",
     "node-addon-api": "^2.0.0",
     "node-gyp": "^9.3.1",
     "node-gyp-build": "^4.2.3",
-    "prebuildify": "^4.1.1",
+    "prebuildify": "^5.0.1",
     "ts-jest": "^29.1.0",
-    "ts-mocha": "^10.0.0",
     "typescript": "^5.0.4"
   },
   "files": [
