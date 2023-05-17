@@ -187,7 +187,7 @@ describe("Node-Libxml", function () {
     expect(wellformedV).toBeFalsy;
     expect(libxml).not.toHaveProperty("wellformedErrors");
     expect(libxml).toHaveProperty("validationDtdErrors");
-    libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"]; //?
+    libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"];
     expect(libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"]).toHaveLength(
       5
     );
@@ -203,7 +203,6 @@ describe("Node-Libxml", function () {
     libxml.freeXml();
     libxml.freeDtds();
   });
-  // // SCHEMAS
   it("Should return wellformed & valid on a wellformed & valid xml SCHEMA", function () {
     let libxml = new Libxml();
     let testDefaultWf = libxml.loadXml("tests/data/test-valid-schema.xml");
