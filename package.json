@@ -1,6 +1,6 @@
 {
   "name": "node-libxml",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
   "main": "index.ts",
   "repository": {
