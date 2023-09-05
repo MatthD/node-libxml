@@ -2,7 +2,7 @@
   "name": "node-libxml",
   "version": "5.0.1",
   "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
-  "main": "index.ts",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jupitex/node-libxml.git"
@@ -29,12 +29,8 @@
   },
   "files": [
     "prebuilds/**/*",
-    "test/**/*",
-    "vendor/**/*",
-    "binding.gyp",
-    "*.ts",
+    "*.d.ts",
     "*.js",
-    "libxml*.cpp",
     "libxml*.h",
     "Readme.md",
     "package.json"

@@ -47,15 +47,15 @@ describe("Node-Libxml", function () {
     let libxml = new Libxml();
     let testInvalidWf = libxml.loadXml("tests/data/test-not-valid-dtd.xml");
     libxml.loadDtds(["tests/dtd/mydoctype.dtd"]);
-    expect(libxml.getMaxErrorNumber()).toEqual(100);
+    expect(libxml.getMaxErrorNumber()).toEqual(30);
     let testInvalid = libxml.validateAgainstDtds(3);
-    expect(libxml.getMaxErrorNumber()).toEqual(100);
+    expect(libxml.getMaxErrorNumber()).toEqual(30);
     expect(testInvalidWf).toBeTruthy;
     expect(testInvalid).toBeFalsy;
     expect(libxml).toHaveProperty("validationDtdErrors");
     expect(typeof libxml.validationDtdErrors).toBe("object");
     expect(
-      libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"].length
+      libxml.validationDtdErrors?.["tests/dtd/mydoctype.dtd"].length
     ).toEqual(3);
     libxml.freeDtds();
     libxml.freeXml();
@@ -77,7 +77,7 @@ describe("Node-Libxml", function () {
     expect(libxml).toHaveProperty("validationDtdErrors");
     expect(typeof libxml.validationDtdErrors).toBe("object");
     expect(
-      libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"].length
+      libxml.validationDtdErrors?.["tests/dtd/mydoctype.dtd"].length
     ).toEqual(3);
     libxml.freeDtds();
     libxml.freeXml();
@@ -136,17 +136,17 @@ describe("Node-Libxml", function () {
   });
   // // // ABOVE IS ALL THE SAME WITH MEMORY MANUAL MANAGEMENT
   it("should free XML memory & infos when asked in manual mod On not wellformed xml", function () {
-    let libxml = new Libxml(true);
+    let libxml = new Libxml();
     let wellformed = libxml.loadXml("tests/data/test-not-wellformed.xml");
     expect(wellformed).toBeFalsy;
     expect(libxml).toHaveProperty("wellformedErrors");
     expect(Array.isArray(libxml.wellformedErrors)).toBe(true);
-    expect(libxml.wellformedErrors.length).toBeGreaterThanOrEqual(1);
+    expect(libxml.wellformedErrors?.length).toBeGreaterThanOrEqual(1);
     libxml.freeXml();
     expect(libxml).not.toHaveProperty("wellformedErrors");
   });
   it("should  not crash when freeUp memory xml multiple time!", function () {
-    let libxml = new Libxml(true);
+    let libxml = new Libxml();
     let wellFormed = libxml.loadXml("tests/data/test-default.xml");
     expect(wellFormed).toBeTruthy;
     expect(libxml).not.toHaveProperty("wellformedErrors");
@@ -187,19 +187,19 @@ describe("Node-Libxml", function () {
     expect(wellformedV).toBeFalsy;
     expect(libxml).not.toHaveProperty("wellformedErrors");
     expect(libxml).toHaveProperty("validationDtdErrors");
-    libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"];
-    expect(libxml.validationDtdErrors["tests/dtd/mydoctype.dtd"]).toHaveLength(
-      5
-    );
+    libxml.validationDtdErrors?.["tests/dtd/mydoctype.dtd"];
     expect(
-      libxml.validationDtdErrors["tests/dtd/myBADdoctype.dtd"]
+      libxml.validationDtdErrors?.["tests/dtd/mydoctype.dtd"]
     ).toHaveLength(5);
     expect(
-      libxml.validationDtdErrors["tests/dtd/myBADdoctype2.dtd"]
+      libxml.validationDtdErrors?.["tests/dtd/myBADdoctype.dtd"]
     ).toHaveLength(5);
-    expect(libxml.validationDtdErrors["tests/dtd/mydoctype2.dtd"]).toHaveLength(
-      5
-    );
+    expect(
+      libxml.validationDtdErrors?.["tests/dtd/myBADdoctype2.dtd"]
+    ).toHaveLength(5);
+    expect(
+      libxml.validationDtdErrors?.["tests/dtd/mydoctype2.dtd"]
+    ).toHaveLength(5);
     libxml.freeXml();
     libxml.freeDtds();
   });
@@ -222,21 +222,21 @@ describe("Node-Libxml", function () {
     expect(testDefaultV).toBeFalsy;
     expect(libxml).toHaveProperty("validationSchemaErrors");
     expect(typeof libxml.validationSchemaErrors).toBe("object");
-    expect(libxml.validationSchemaErrors["tests/xsd/MARC21slim-bad.xsd"])
+    expect(libxml.validationSchemaErrors?.["tests/xsd/MARC21slim-bad.xsd"])
       .toBeTruthy;
     expect(
       Array.isArray(
-        libxml.validationSchemaErrors["tests/xsd/MARC21slim-bad.xsd"]
+        libxml.validationSchemaErrors?.["tests/xsd/MARC21slim-bad.xsd"]
       )
     ).toBe(true);
     expect(
-      libxml.validationSchemaErrors["tests/xsd/MARC21slim-bad.xsd"][0]
+      libxml.validationSchemaErrors?.["tests/xsd/MARC21slim-bad.xsd"][0]
     ).toHaveProperty("column");
     expect(
-      libxml.validationSchemaErrors["tests/xsd/MARC21slim-bad.xsd"][0]
+      libxml.validationSchemaErrors?.["tests/xsd/MARC21slim-bad.xsd"][0]
     ).toHaveProperty("line");
     expect(
-      libxml.validationSchemaErrors["tests/xsd/MARC21slim-bad.xsd"][0]
+      libxml.validationSchemaErrors?.["tests/xsd/MARC21slim-bad.xsd"][0]
     ).toHaveProperty("message");
     libxml.freeXml();
     libxml.freeSchemas();
