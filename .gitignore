@@ -197,3 +197,8 @@ $RECYCLE.BIN/
 
 build*
 prebuilds
+
+
+# Added by cargo
+
+/target
