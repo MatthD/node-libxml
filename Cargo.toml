@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 libxml = "0.3.3"
+xml_oxide = "0.3.0"
+xmltree = "0.10.3"
