@@ -31,8 +31,11 @@
     "prebuilds/**/*",
     "*.d.ts",
     "*.js",
-    "libxml*.h",
+    "*.h",
+    "*.cpp",
+    "vendor/libxml/**/*",
     "Readme.md",
+    "binding.gyp",
     "package.json"
   ],
   "gypfile": true,
