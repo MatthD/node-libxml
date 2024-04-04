@@ -11,10 +11,18 @@
   "scripts": {
     "test": "jest",
     "install": "node-gyp-build",
-    "build": "prebuildify --napi --tag-uv --tag-armv --strip",
-    "build-mac": "prebuildify --napi --debug --strip --platform='darwin'",
-    "build-linux": "prebuildify --napi --debug --strip --platform='linux' ",
-    "build-windows": "prebuildify --napi --debug --strip --platform='win32' "
+    "compile": "tsc",
+    "build": "prebuildify --napi --tag-uv --tag-armv ",
+    "build-mac-arm": "prebuildify --napi --debug  --platform='darwin' --arch arm",
+    "build-mac-x64": "prebuildify --napi --debug  --platform='darwin' --arch x64",
+    "build-mac-arm64": "prebuildify --napi --debug  --platform='darwin' --arch arm64",
+    "build-linux-arm": "prebuildify --napi --debug  --platform='linux' --arch arm",
+    "build-linux-x64": "prebuildify --napi --debug  --platform='linux' --arch x64",
+    "build-linux-arm64": "prebuildify --napi --debug  --platform='linux' --arch arm64",
+    "build-windows-arm": "prebuildify --napi --debug  --platform='win32' --arch arm",
+    "build-windows-x64": "prebuildify --napi --debug  --platform='win32' --arch x64",
+    "build-windows-arm64": "prebuildify --napi --debug  --platform='win32' --arch arm64",
+    "build-all": "npm run compile &&  npm run build-mac-arm && npm run build-mac-x64 &&  npm run build-mac-arm64 && npm run build-linux-arm && npm run build-linux-x64 && npm run build-linux-arm64 && npm run build-windows-arm && npm run build-windows-x64 && npm run build-windows-arm64"
   },
   "author": "MatthD",
   "license": "MIT",
@@ -22,8 +30,8 @@
     "bindings": "^1.5.0",
     "node-addon-api": "^2.0.0",
     "node-gyp": "^9.3.1",
-    "node-gyp-build": "^4.2.3",
-    "prebuildify": "^5.0.1",
+    "node-gyp-build": "^4.8.0",
+    "prebuildify": "^6.0.0",
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   },
@@ -36,7 +44,7 @@
     "vendor/libxml/**/*",
     "Readme.md",
     "binding.gyp",
-    "package.json"
+    "package.json"    
   ],
   "gypfile": true,
   "devDependencies": {
