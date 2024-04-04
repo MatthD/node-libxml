@@ -39,7 +39,7 @@ Node-libxml has been thought differently than [libxmljs](https://github.com/libx
 ## Use
 
 ```javascript
-  const Libxml = require('node-libxml');
+  const Libxml = require('node-libxml').Libxml; // or import {Libxml} from 'node-libxml'
   let libxml = new Libxml();
 
   let xmlIsWellformed = libxml.loadXml('path/to/xml');

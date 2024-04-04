@@ -1,6 +1,6 @@
 {
   "name": "node-libxml",
-  "version": "5.0.5",
+  "version": "5.0.4",
   "description": "Check Wellformed, DTD validity & get Xpath from pure node addons",
   "main": "index.js",
   "repository": {
@@ -13,15 +13,15 @@
     "install": "node-gyp-build",
     "compile": "tsc",
     "build": "prebuildify --napi --tag-uv --tag-armv ",
-    "build-mac-arm": "prebuildify --napi --debug  --platform='darwin' --arch arm",
-    "build-mac-x64": "prebuildify --napi --debug  --platform='darwin' --arch x64",
-    "build-mac-arm64": "prebuildify --napi --debug  --platform='darwin' --arch arm64",
-    "build-linux-arm": "prebuildify --napi --debug  --platform='linux' --arch arm",
-    "build-linux-x64": "prebuildify --napi --debug  --platform='linux' --arch x64",
-    "build-linux-arm64": "prebuildify --napi --debug  --platform='linux' --arch arm64",
-    "build-windows-arm": "prebuildify --napi --debug  --platform='win32' --arch arm",
-    "build-windows-x64": "prebuildify --napi --debug  --platform='win32' --arch x64",
-    "build-windows-arm64": "prebuildify --napi --debug  --platform='win32' --arch arm64",
+    "build-mac-arm": "prebuildify --napi  --platform='darwin' --arch arm",
+    "build-mac-x64": "prebuildify --napi  --platform='darwin' --arch x64",
+    "build-mac-arm64": "prebuildify --napi  --platform='darwin' --arch arm64",
+    "build-linux-arm": "prebuildify --napi  --platform='linux' --arch arm",
+    "build-linux-x64": "prebuildify --napi  --platform='linux' --arch x64",
+    "build-linux-arm64": "prebuildify --napi  --platform='linux' --arch arm64",
+    "build-windows-arm": "prebuildify --napi  --platform='win32' --arch arm",
+    "build-windows-x64": "prebuildify --napi  --platform='win32' --arch x64",
+    "build-windows-arm64": "prebuildify --napi  --platform='win32' --arch arm64",
     "build-all": "npm run compile &&  npm run build-mac-arm && npm run build-mac-x64 &&  npm run build-mac-arm64 && npm run build-linux-arm && npm run build-linux-x64 && npm run build-linux-arm64 && npm run build-windows-arm && npm run build-windows-x64 && npm run build-windows-arm64"
   },
   "author": "MatthD",
@@ -44,7 +44,7 @@
     "vendor/libxml/**/*",
     "Readme.md",
     "binding.gyp",
-    "package.json"
+    "package.json"    
   ],
   "gypfile": true,
   "devDependencies": {
