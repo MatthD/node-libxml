@@ -47,9 +47,9 @@ describe("Node-Libxml", function () {
     let libxml = new Libxml();
     let testInvalidWf = libxml.loadXml("tests/data/test-not-valid-dtd.xml");
     libxml.loadDtds(["tests/dtd/mydoctype.dtd"]);
-    expect(libxml.getMaxErrorNumber()).toEqual(30);
+    expect(libxml.getMaxErrorNumber()).toEqual(100);
     let testInvalid = libxml.validateAgainstDtds(3);
-    expect(libxml.getMaxErrorNumber()).toEqual(30);
+    expect(libxml.getMaxErrorNumber()).toEqual(100);
     expect(testInvalidWf).toBeTruthy;
     expect(testInvalid).toBeFalsy;
     expect(libxml).toHaveProperty("validationDtdErrors");
