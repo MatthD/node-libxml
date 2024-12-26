@@ -13,27 +13,22 @@
     "install": "node-gyp-build",
     "compile": "tsc",
     "build": "prebuildify --napi --tag-uv --tag-armv ",
-    "build-mac-arm": "prebuildify --napi  --platform='darwin' --arch arm",
-    "build-mac-x64": "prebuildify --napi  --platform='darwin' --arch x64",
-    "build-mac-arm64": "prebuildify --napi  --platform='darwin' --arch arm64",
-    "build-linux-arm": "prebuildify --napi  --platform='linux' --arch arm",
-    "build-linux-x64": "prebuildify --napi  --platform='linux' --arch x64",
-    "build-linux-arm64": "prebuildify --napi  --platform='linux' --arch arm64",
-    "build-windows-arm": "prebuildify --napi  --platform='win32' --arch arm",
-    "build-windows-x64": "prebuildify --napi  --platform='win32' --arch x64",
-    "build-windows-arm64": "prebuildify --napi  --platform='win32' --arch arm64",
+    "build-mac-arm": "prebuildify --napi  --platform=darwin --arch arm",
+    "build-mac-x64": "prebuildify --napi  --platform=darwin --arch x64",
+    "build-mac-arm64": "prebuildify --napi  --platform=darwin --arch arm64",
+    "build-linux-arm": "prebuildify --napi  --platform=linux --arch arm",
+    "build-linux-x64": "prebuildify --napi  --platform=linux --arch x64",
+    "build-linux-arm64": "prebuildify --napi  --platform=linux --arch arm64",
+    "build-windows-arm": "prebuildify --napi  --platform=win32 --arch arm",
+    "build-windows-x64": "prebuildify --napi  --platform=win32 --arch x64",
+    "build-windows-arm64": "prebuildify --napi  --platform=win32 --arch arm64",
     "build-all": "npm run compile &&  npm run build-mac-arm && npm run build-mac-x64 &&  npm run build-mac-arm64 && npm run build-linux-arm && npm run build-linux-x64 && npm run build-linux-arm64 && npm run build-windows-arm && npm run build-windows-x64 && npm run build-windows-arm64"
   },
   "author": "MatthD",
   "license": "MIT",
   "dependencies": {
-    "bindings": "^1.5.0",
     "node-addon-api": "^2.0.0",
-    "node-gyp": "^9.3.1",
-    "node-gyp-build": "^4.8.0",
-    "prebuildify": "^6.0.0",
-    "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4"
+    "node-gyp-build": "^4.8.4"
   },
   "files": [
     "prebuilds/**/*",
@@ -51,7 +46,10 @@
     "@types/chai": "^4.3.5",
     "@types/jest": "^29.5.1",
     "jest": "^29.5.0",
-    "node-pre-gyp": "0.17.0"
+    "node-pre-gyp": "0.17.0",
+    "prebuildify": "^6.0.1",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
   },
   "bundleDependencies": [
     "node-pre-gyp"
