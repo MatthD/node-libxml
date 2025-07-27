@@ -1,8 +1,11 @@
 # Node-LibXML
 
-#### For old node.js versions please use version < 4.0.0 Already for old LTS node (4,6,8) `npm install node-libxml@3.2.5`;
+### Update July 2025: Works on node v22/v24 👌🏻 
 
-#### For new node.js versions (10,12,14,16,18,20) we are using n-api so please install `npm install node-libxml@5.0.0`, its compatible with arm proc too for version >= 16 (you wil notice a free memory message when using free memory function after node >16) 🙂
+#### For new node.js versions (10,12,14,16,18,20) we are using n-api so please install `npm install node-libxml@5.0.0` at minimum, its compatible with arm proc too for version >= 16 (you wil notice a free memory message when using free memory function after node >16) 🙂
+
+
+#### For old node.js versions please use version < 4.0.0 Already for old LTS node (4,6,8) `npm install node-libxml@3.2.5`;
 
 _Node-Libxml_ is a _[libxml2]_ Node.js Wrapper
 
